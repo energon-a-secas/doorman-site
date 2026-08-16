@@ -26,7 +26,7 @@ export const AI_MODELS = {
  * Total tokens (input + output) to build a recipe of each size with an
  * agentic coding tool — mid-points of observed ranges (landing page
  * 0.5–2M, CRUD 2–10M, full-stack 10–50M), extended for L/XL.
- * Frontend tokenFactor (0.7 / 1.0 / 1.5) multiplies this.
+ * Frontend tokenFactor (0.25 no-code / 0.7 / 1.0 / 1.5) multiplies this.
  */
 export const SIZE_TOKENS = {
   S:  1_500_000,

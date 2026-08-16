@@ -57,6 +57,14 @@ export const database = {
       gotcha: 'Exact free limits are fuzzy mid-migration to the new engine — verify before committing.',
       cost: { hobby: 0, launched: 5, scaling: 30 },
     },
+    airtable: {
+      name: 'Airtable', type: 'freemium', strategy: 'managed',
+      free: '1,000 records + 1 GB attachments per base, 5 editors, 100 automation runs/mo',
+      entry: '$20/user/mo Team (50k records/base)', url: 'https://airtable.com/pricing',
+      gotcha: 'Priced per editor, not per request — and the API caps at 5 requests/sec per base, so it is a team database, never a public app backend.',
+      bundles: ['storage', 'cms', 'auth'],
+      cost: { hobby: 0, launched: 40, scaling: 225 },
+    },
     mongo: {
       name: 'MongoDB Atlas', type: 'freemium', strategy: 'managed',
       free: 'M0: 512 MB, ~100 ops/sec, shared',
@@ -85,6 +93,14 @@ export const database = {
       entry: '~$4–6 VPS (Hetzner/DO)', url: 'https://www.hetzner.com/cloud/',
       gotcha: 'You own backups, HA, patching, and the 3am pages. Snapshot backups cost extra.',
       cost: { hobby: 5, launched: 9, scaling: 40 },
+    },
+    nocodb: {
+      name: 'NocoDB (self-host)', type: 'oss', strategy: 'oss',
+      free: 'Airtable-style grid UI, forms and views — free on your own box',
+      entry: '$0 + ~$5 VPS', url: 'https://nocodb.com/',
+      gotcha: 'AGPLv3 community edition, and the polish gap shows in the UI your non-technical editors have to live in — the part they were paying Airtable for.',
+      bundles: ['storage', 'cms', 'auth'],
+      cost: { hobby: 5, launched: 9, scaling: 25 },
     },
     none: {
       name: 'No database', type: 'none', strategy: null,

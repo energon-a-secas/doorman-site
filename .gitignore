@@ -17,3 +17,8 @@ package-lock.json
 # ── Secrets — never commit ────────────────────────────────────────────────────
 .env
 .env.*
+
+# ── Ephemeral skill working state (see neorgon-forge/docs/authoring.md) ───────
+# Session briefs and maps. Useful while the work happens, not repo content, and
+# on a site repo this directory is public.
+.forge/

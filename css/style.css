@@ -293,6 +293,9 @@ button:active, .btn:active {
 .recipe-select {
   appearance: none;
   flex: 1;
+  /* a select's min-width resolves to its longest option, so without this the
+     recipe labels push the page into horizontal scroll on a phone */
+  min-width: 0;
   max-width: 520px;
   min-height: var(--control-height);
   font-family: var(--font);
@@ -476,7 +479,9 @@ button:active, .btn:active {
 .alt__link:hover { color: var(--text-secondary); text-decoration: underline; }
 
 /* ── Frontend approach cards ───────────────────────────────── */
-.fe-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+/* auto-fit, not a fixed count: the fourth approach (no-code) must not squeeze
+   the other three into unreadable columns on a narrow desktop window. */
+.fe-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-3); }
 .fe-card {
   font-family: var(--font);
   text-align: left;
@@ -628,7 +633,6 @@ button:active, .btn:active {
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .cost-grid, .chal-grid { grid-template-columns: 1fr; }
-  .fe-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 720px) {
   .ing__alts { grid-template-columns: 1fr; }
@@ -636,7 +640,7 @@ button:active, .btn:active {
   .ing__cost { display: none; }
   .glance__grid { grid-template-columns: 1fr 1fr; }
   .recipe-bar { flex-wrap: wrap; }
-  .recipe-select { max-width: none; flex-basis: 100%; order: 3; }
+  .recipe-select { max-width: none; flex-basis: 100%; width: 100%; order: 3; }
 }
 @media (max-width: 600px) {
   .container { padding: var(--space-4); }

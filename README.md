@@ -2,7 +2,7 @@
 
 # Doorman
 
-See the value before you fire it. Scope what it really costs to duplicate a vendor deliverable in-house — and price the invisible work a naive estimate skips.
+Every site you use is a recipe. Pick one, see its probable stack, swap the ingredients for open-source or managed alternatives, price the copy across scale tiers — then take the prompt and cook.
 
 [![Live][badge-site]][url-site]
 [![HTML5][badge-html]][url-html]
@@ -28,31 +28,52 @@ See the value before you fire it. Scope what it really costs to duplicate a vend
 
 ---
 
-Doorman is a build-vs-buy scoper. You describe a vendor deliverable, pick the scope axes, and it estimates what duplicating it in-house actually costs — in **tokens/context** (the primary axis), **engineers**, and **people-time** — rolled into a single T-shirt cost band with an ordered duplication plan.
+Doorman is a **stack cookbook**. You pick an app archetype — SaaS dashboard, marketplace, docs chatbot, an Airtable base with Interfaces on top — and it shows the stack that archetype probably runs on: which of the 14 service categories it actually needs, a concrete default pick for each, the free tier and the gotcha of every alternative, what the whole thing costs per month at three scale tiers, what it would cost to have an AI build it once, and the four hard parts the landing page never mentions.
 
-The name is the thesis. The **doorman fallacy** (Rory Sutherland): firing the doorman looks efficient because you only price what you see — the salary, the open door. You don't see the packages he signed for, the taxis he hailed, the trouble he kept out. Duplicating a vendor deliverable is the same trade. Doorman makes you tick the **invisible value** before you decide — and anything you leave unticked is shown back as an unpriced cost.
+The name is the thesis. The **doorman fallacy** (Rory Sutherland): firing the doorman looks efficient because you only price what you see. Doorman applies that to a stack — the ingredient list is the part everyone copies, and the gotchas underneath each one (Firebase's uncapped Blaze bill, Ably's 1-publish-to-100-subscribers fan-out, Airtable's 5 requests/sec) are the part that decides whether the copy survives. The doorman knows what's in the building.
 
-**Everything stays on your device. No backend, no accounts, no network calls.**
+**Everything stays on your device. No backend, no accounts, no network calls** — the only outbound requests are favicons for the service logos.
 
 ---
 
 ## What it does
 
-- **Example gallery** — 12 real cases grouped by verdict (usually-buy: Lucidchart, Notion, an auth service, Zapier; toss-ups: Calendly, Linear, an internal SPA, a docs chatbot; often-own: a status page, a single-use form, a landing page, an analytics dashboard). Click one to draft the whole scenario and see an expectation, then tweak from there.
-- **Simple ⇄ Advanced modes** — Simple asks only the headline scope and assumes a sensible recommended stack. Advanced exposes every axis plus the full stack-decision comparison, so you can start from an assumed pattern and adjust in between.
-- **Stack decisions with pros/cons** — for each relevant piece (backend, auth, hosting, domain, AI provider) pick from real options — Convex vs Supabase vs Firebase vs serverless vs custom; Convex-local vs Clerk vs Auth0 vs roll-your-own; GitHub Pages vs Cloudflare vs Vercel vs a VPS; an internal/owned subdomain vs Cloudflare/Namecheap/GoDaddy; Anthropic vs OpenAI vs OpenRouter vs a local model. Each shows trade-offs and a recurring monthly cost, and feeds the estimate.
-- **Own vs. buy** — enter what the vendor charges today and Doorman amortizes a one-time build plus the chosen stack's recurring cost against the subscription: a breakeven point, a total-cost comparison, and a plain-language verdict.
-- **Honest estimates (p50 → p90)** — build cost and time are shown as a range, not a false-precision point. A planning-contingency uplift produces a realistic p50; an uncertainty band projects the p90. Every dollar figure has a **"how this is calculated"** trail.
-- **Editable assumptions** — the blended weekly rate, TCO horizon, planning contingency, and uncertainty band are all exposed and adjustable (Advanced mode). Nothing that drives a number is hidden.
-- **Market anchor** — a per-artifact reference price range sits beside the vendor-cost input so entries aren't free-floating.
-- **What drives the cost** — a sensitivity (tornado) view ranks which levers move the build cost most, so you attack the biggest ones first.
-- **Save, compare & share** — save named scenarios, tick 2–3 to compare side by side (build-on-Convex vs build-custom vs keep-buying) under one cost model, and copy a share link that encodes the whole scenario in the URL.
+Five steps, one page:
+
+1. **Pick a recipe** — 13 archetypes plus a blank canvas. Each declares its own ingredient list (a mobile backend has no hosting row; the Airtable recipe has no hosting row either, because Interfaces *are* the hosting), a build size that drives the AI estimate, and four challenges written for that archetype specifically.
+2. **The stack** — tap any ingredient to open its alternatives, split into **open source / self-host** and **managed / pay-to-win**, each with its real free-tier limits, entry price, a link to the live pricing page, and the one thing that bites people. Two quick-swaps flip the whole stack: **All open-source** and **All managed**. **BaaS picks absorb categories** — choose Supabase and auth, storage and realtime fold into it as one bill; choose Airtable and storage, CMS and auth fold in, because a seat *is* the login.
+3. **What it costs** — a per-ingredient table at **Hobby / Launched / Scaling**, with the all-OSS and all-managed totals for the same recipe shown side by side. Plus the one-time **AI build cost** across 11 coding models (cheapest first, "best value" flagged) and the flat-subscription alternative, since most builders never touch the API.
+4. **The hard parts** — the recipe's four challenges, next to the gotcha of every ingredient you actually picked.
+5. **Take the prompt** — the whole session exported as a markdown build order: the frontend decision with its trade-offs, every ingredient with its free tier and its trap, the cost expectations, the challenges to plan for, and constraints that tell the AI *not* to add a second service for a job a bundled pick already does. Copy, download, or share the URL.
+
+**Frontend — pick your compromise** sits inside step 2 as four cards, because it is the axis that moves the build estimate most: pure HTML/CSS/JS (×0.7), Vanilla + Tailwind (×1.0), a framework (×1.5), or a **no-code UI** (×0.25) where the tool holding your data draws the screens and there is nothing to generate at all.
+
+---
+
+## The recipes
+
+| Recipe | Size | The point of it |
+|---|---|---|
+| SaaS Dashboard | M | Login, a data model, a bill. Auth is a subscription with a meter on your user table. |
+| Social / Community App | L | Cheap to start, brutal to scale — the feed is a data pipeline and moderation arrives uninvited. |
+| E-commerce Store | L | Money touches everything; compliance picks your processor. |
+| Blog / Content Site | S | The CMS decision is forever. |
+| Realtime Chat | M | Fan-out billing is the trap. |
+| Marketplace | XL | The boss fight: you are a payments company with a cold-start problem. |
+| Mobile App Backend | M | No frontend. Users run old app versions for months. |
+| AI Wrapper App | M | Your COGS is someone else's pricing page. |
+| **Internal Tool / Back Office** | M | Staff-only, no payments. The MAU meter runs *backwards* — 40 employees are free, SSO is what costs. |
+| **Support / Docs Chatbot** | M | Retrieval is the product; the model is a commodity. No paywall means no natural spend cap. |
+| **Airtable Base + Interfaces** | S | The base is the backend *and* the frontend. Priced by headcount; no git means no staging and no revert. |
+| **Airtable + App Backend (glue)** | M | Airtable for editors, Convex for the app, a Cloudflare Worker between, Netlify out front — three runtimes competing to hold one business rule. |
+| **Static SPA on GitHub Pages** | S | $0 at every tier. "Privately shared" is not a Pages feature. |
+| Blank Canvas | M | All 14 categories, no defaults. Justify each one. |
 
 ---
 
 ## Usage
 
-No install or build step required.
+No install, no build step.
 
 ```bash
 make serve
@@ -65,43 +86,65 @@ Or `python3 -m http.server 8849` from this directory. ES modules require an HTTP
 
 ## The model
 
-**Token/context is the primary axis**, because baseline reuse is the dominant lever on cost:
+Two independent numbers, both deterministic arithmetic — no LLM anywhere in the app.
 
-| Baseline reuse | Token factor | Meaning |
-|---|---|---|
-| From scratch | ×1.0 | Everything regenerated |
-| Partial | ×0.6 | Some shared logic; AI starts from a known context |
-| Full | ×0.35 | Most is a known baseline; only the delta is net-new |
+**Run it.** Every option carries an editorial `{ hobby, launched, scaling }` monthly estimate; the tiers total them. A category absorbed by a BaaS pick reports `$0` with a pointer to its bundler, so bundling shows up as the saving it is instead of vanishing from the table.
 
-Scope axes (backend, integrations, data sensitivity, compliance, maintenance, AI component, UI complexity) each add token weight, engineer demand, and people-time. Stack decisions add further build deltas (relative to the recommended zero-delta path) and a recurring monthly cost. The cost model is deterministic — no LLM, pure arithmetic — and produces a band (XS → XL, describing **build effort**), an engineer range, a people-time band, a monthly stack cost, and a baseline-aware duplication plan with reused steps marked. The buy-vs-build *recommendation* comes from the own-vs-buy card, which weighs that effort against the vendor's actual price — not from the effort band alone.
+**Build it once.**
 
-## The Doorman check
+```
+buildTokens = SIZE_TOKENS[recipe.size] × FRONTENDS[frontend].tokenFactor
+buildCost   = buildTokens × blendedRate(model)      // 3:1 input:output
+```
 
-Six invisible considerations a duplication estimate routinely skips — tacit method, accumulated edge cases, ongoing maintenance, relationships & institutional memory, what breaks when it's gone, and keeping pace with change. Tick what you've genuinely accounted for; the result pane shows the rest as unpriced risk. When a "cheap to duplicate" estimate is hiding three unticked doorman costs, that gap *is* the vendor's intrinsic value made visible.
+| Recipe size | Tokens | | Frontend | Factor |
+|---|---|---|---|---|
+| S — a few pages, one data model | 1.5M | | No-code UI | ×0.25 |
+| M — real CRUD + auth + one integration | 6M | | Pure HTML/CSS/JS | ×0.7 |
+| L — multiple roles or a second hard subsystem | 15M | | Vanilla + Tailwind | ×1.0 |
+| XL — marketplace-class | 35M | | Framework | ×1.5 |
+
+That is why the same Airtable recipe reads 0.38M tokens as a no-code build and 2.25M as a framework build. Prices are a **snapshot researched July 2026** with every source linked — the app says so in its own footer, and so does the exported prompt.
 
 ---
 
 ## Architecture
 
+Zero-build ES modules, ~2.6k lines. Data is separated from behaviour so a price change is a one-line edit in one file.
+
 ```
 doorman-site/
-├── index.html          # App shell, SEO head, JSON-LD, the doorman framing
-├── css/style.css        # Neorgon dark theme + brass accent (#c2904a)
+├── index.html               # App shell, SEO head, JSON-LD, the cookbook framing
+├── css/style.css            # Neorgon dark theme + brass accent (#c2904a)
 ├── js/
-│   ├── app.js          # Entry point
-│   ├── state.js        # Scenario state + localStorage (doorman-v2), preset apply
-│   ├── data.js         # Modes, artifacts, reuse, axes, stack decisions, presets, hidden considerations, bands
-│   ├── costmodel.js    # Deterministic estimate + own-vs-buy + duplication plan + suggestions
-│   ├── render.js       # Mode toggle, preset gallery, scoping form, stack decisions, live result + markdown export
-│   ├── events.js       # Mode, presets, pickers, multiselect axes, stack options, range, money input, checkboxes
-│   └── utils.js        # Helpers: token formatting, toast, download
-├── Makefile            # make serve (port 8849)
+│   ├── app.js               # Entry point — initState, render, wire events
+│   ├── state.js             # Recipe + picks + frontend + tier; bundle rules, localStorage, hash sharing
+│   ├── data-services.js     # Aggregates the 14 categories; the BUNDLED sentinel
+│   ├── services-hosting.js  # hosting, queue
+│   ├── services-data.js     # database, realtime, aiApi
+│   ├── services-edge.js     # storage, cdn
+│   ├── services-identity.js # auth, payments
+│   ├── services-ops.js      # email, search, analytics, monitoring, cms
+│   ├── data-recipes.js      # 14 recipes, 4 frontend approaches, 3 scale tiers
+│   ├── data-models.js       # 11 coding models, size→token table, subscription path
+│   ├── costmodel.js         # Infra rows/totals, strategy totals, build tokens, model costs
+│   ├── prompt.js            # The exportable markdown build order
+│   ├── render.js            # Full re-render of all five steps
+│   ├── events.js            # One delegated click + change listener on #app; every mutation re-renders
+│   ├── icons.js             # Inline stroke SVGs — no emoji in the UI, ever
+│   └── utils.js             # escHtml, fmtUsd, fmtTokens, toast, download
+├── Makefile                 # make serve (port 8849)
 ├── robots.txt
 ├── sitemap.xml
-└── CNAME               # doorman.neorgon.com
+└── CNAME                    # doorman.neorgon.com
 ```
 
-State autosaves to `localStorage` under `doorman-v2`. No backend.
+**84 service options across 14 categories.** Adding one is a single object in the right `services-*.js`; two things about the file order are load-bearing, and both are documented at the top of `data-recipes.js`:
+
+- `applyStrategy('oss')` takes the **first** option whose `strategy` is `'oss'` in a category, so insertion order decides what "All open-source" lands on.
+- `setPick` stomps every category a `bundles` option claims. Recipe defaults bypass `setPick` and are assigned directly, which is how a recipe can deliberately keep R2 while Supabase would otherwise absorb storage.
+
+State autosaves to `localStorage` under `doorman-cookbook-v1` and encodes into the URL hash as `#c=…`. Boot order: hash → localStorage → the SaaS recipe.
 
 <div align="center">
 

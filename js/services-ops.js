@@ -216,6 +216,13 @@ export const cms = {
       gotcha: 'The $0 → $300/mo cliff with nothing in between is the most famous pricing wall in CMS.',
       cost: { hobby: 0, launched: 300, scaling: 300 },
     },
+    airtable: {
+      name: 'Airtable (base as CMS)', type: 'freemium', strategy: 'managed',
+      free: '1,000 records/base, 5 editors — the whole team already knows the grid',
+      entry: '$20/user/mo Team', url: 'https://airtable.com/pricing',
+      gotcha: 'No draft/publish, no revision history you can diff, no staging base — you build the status field, the preview and the cache yourself, and the 5 req/s API cap means you build the cache first.',
+      cost: { hobby: 0, launched: 40, scaling: 90 },
+    },
     none: {
       name: 'Hardcoded content', type: 'none', strategy: null,
       free: '', entry: '$0', url: '',
