@@ -1,6 +1,6 @@
-# CLAUDE.md — Doorman
+# CLAUDE.md: Doorman
 
-Doorman — stack cookbook for copying any site. 14 app archetypes ("recipes"), each declaring which of the 14 service categories it needs and a default pick per category; tap an ingredient to swap it among 84 options split open-source/self-host vs managed, each carrying its real free-tier limits, entry price, pricing link and the gotcha that bites people. Two quick-swaps flip the whole stack (All open-source / All managed). **Bundling is the load-bearing idea**: an option's `bundles` list absorbs whole categories into one bill (Supabase→auth+storage+realtime, Airtable→storage+cms+auth, since a seat *is* the login) — `setPick` stomps claimed categories, while recipe defaults bypass it and so may deliberately unbundle. Costs are two independent numbers: monthly infra at Hobby/Launched/Scaling, and the one-time AI build (`SIZE_TOKENS[size] × frontend.tokenFactor × blendedRate`) across 11 coding models plus the flat-subscription path. The no-payments cases are covered on purpose — internal back office (where the MAU meter runs backwards and SSO is the real cost), docs chatbot, Airtable-as-both-ends, an Airtable+Convex+Worker+Netlify glue stack, and a $0 GitHub Pages SPA. Exports the session as a markdown build order that tells the agent *not* to add a second service for a job a bundled pick already does. Data lives in `services-*.js` + `data-recipes.js` / `data-models.js`; insertion order inside a category is load-bearing (`applyStrategy('oss')` takes the first oss option). Zero-build ES modules, localStorage `doorman-cookbook-v1` + `#c=` hash share, no backend (doorman.neorgon.com)
+Doorman: stack cookbook for copying any site. 14 app archetypes ("recipes"), each declaring which of the 14 service categories it needs and a default pick per category; tap an ingredient to swap it among 84 options split open-source/self-host vs managed, each carrying its real free-tier limits, entry price, pricing link and the gotcha that bites people. Two quick-swaps flip the whole stack (All open-source / All managed). **Bundling is the load-bearing idea**: an option's `bundles` list absorbs whole categories into one bill (Supabase→auth+storage+realtime, Airtable→storage+cms+auth, since a seat *is* the login), `setPick` stomps claimed categories, while recipe defaults bypass it and so may deliberately unbundle. Costs are two independent numbers: monthly infra at Hobby/Launched/Scaling, and the one-time AI build (`SIZE_TOKENS[size] × frontend.tokenFactor × blendedRate`) across 11 coding models plus the flat-subscription path. The no-payments cases are covered on purpose, internal back office (where the MAU meter runs backwards and SSO is the real cost), docs chatbot, Airtable-as-both-ends, an Airtable+Convex+Worker+Netlify glue stack, and a $0 GitHub Pages SPA. Exports the session as a markdown build order that tells the agent *not* to add a second service for a job a bundled pick already does. Data lives in `services-*.js` + `data-recipes.js` / `data-models.js`; insertion order inside a category is load-bearing (`applyStrategy('oss')` takes the first oss option). Zero-build ES modules, localStorage `doorman-cookbook-v1` + `#c=` hash share, no backend (doorman.neorgon.com)
 
 **Live:** doorman.neorgon.com · **Port:** 8849
 
@@ -10,7 +10,7 @@ Doorman — stack cookbook for copying any site. 14 app archetypes ("recipes"), 
 make serve
 ```
 
-Then open http://localhost:8849. It must be served over HTTP — the app is ES modules, and `file://` blocks them.
+Then open http://localhost:8849. It must be served over HTTP. The app is ES modules, and `file://` blocks them.
 
 ## Architecture
 
@@ -31,9 +31,9 @@ Then open http://localhost:8849. It must be served over HTTP — the app is ES m
 | `js/data-models.js` | 67 | `AI_MODELS`, `SIZE_TOKENS`, `SIZE_LABELS`, `blendedRate`, `buildCostUsd` |
 | `js/icons.js` | 53 | `icon`, `favicon` |
 | `js/data-services.js` | 25 | `CATEGORIES`, `TYPE_META`, `BUNDLED` |
-| `js/app.js` | 13 | — |
+| `js/app.js` | 13 | none |
 
-Vendored from `packages/neorgon-ui/` — never edit in place, run the sync script instead: `js/neorgon-footer.js`, `js/neorgon-header.js`.
+Vendored from `packages/neorgon-ui/`: never edit in place, run the sync script instead: `js/neorgon-footer.js`, `js/neorgon-header.js`.
 
 ## Data
 
@@ -50,7 +50,7 @@ Vendored from `packages/neorgon-ui/` — never edit in place, run the sync scrip
 - **Bundling is the load-bearing idea.** An option's `bundles` list absorbs whole
   categories into one bill (Supabase → auth+storage+realtime; Airtable →
   storage+cms+auth, since a seat *is* the login). `setPick` stomps any category a
-  bundle claims — but **recipe defaults bypass `setPick`**, so a recipe may
+  bundle claims: but **recipe defaults bypass `setPick`**, so a recipe may
   deliberately unbundle. If you "fix" that inconsistency you break the recipes.
 - **Insertion order inside a category is load-bearing.** `applyStrategy('oss')`
   takes the *first* oss option in the list. Reordering `services-*.js` for
@@ -59,8 +59,8 @@ Vendored from `packages/neorgon-ui/` — never edit in place, run the sync scrip
   and the one-time AI build (`SIZE_TOKENS[size] × frontend.tokenFactor × blendedRate`).
 - The no-payments recipes (internal back office, docs chatbot, $0 Pages SPA) exist
   on purpose. They are the cases where the MAU meter runs backwards and SSO is the
-  real cost — not gaps to be filled in with a payments provider.
+  real cost: not gaps to be filled in with a payments provider.
 
 ## Do not touch
 
-- `js/neorgon-*.js` and `css/neorgon-*.css` — vendored kits, regenerated by `packages/neorgon-ui/sync-*.sh`.
+- `js/neorgon-*.js` and `css/neorgon-*.css`: vendored kits, regenerated by `packages/neorgon-ui/sync-*.sh`.
