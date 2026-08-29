@@ -14,6 +14,8 @@ export const email = {
       entry: '$20/mo Pro (50k)', url: 'https://resend.com/pricing',
       gotcha: 'Developer-first DX; the daily free cap means a signup spike queues your password resets.',
       cost: { hobby: 0, launched: 20, scaling: 50 },
+      exit: 'easy', exitNote: 'Swap the API and re-verify DNS: an afternoon.',
+      rule: 'Set up SPF, DKIM and DMARC before the first signup: a spam-foldered reset email is a lost user.',
     },
     postmark: {
       name: 'Postmark', type: 'freemium', strategy: 'managed',
@@ -21,6 +23,7 @@ export const email = {
       entry: '$15/mo (10k emails)', url: 'https://postmarkapp.com/pricing',
       gotcha: 'Deliverability-obsessed and it shows; marketing email is explicitly banned, transactional only.',
       cost: { hobby: 0, launched: 15, scaling: 60 },
+      exit: 'easy', exitNote: 'The same swap: API plus DNS re-verification.',
     },
     ses: {
       name: 'AWS SES', type: 'paid', strategy: 'managed',
@@ -28,6 +31,8 @@ export const email = {
       entry: '$0.10 per 1,000 emails', url: 'https://aws.amazon.com/ses/pricing/',
       gotcha: '10–100× cheaper than everyone: and you assemble DKIM, bounce handling, and reputation warmup yourself.',
       cost: { hobby: 1, launched: 5, scaling: 30 },
+      exit: 'easy', exitNote: 'Standard sending API: the exit is config.',
+      rule: 'Build bounce and complaint handling first: reputation damage outlives the cheap sending.',
     },
     brevo: {
       name: 'Brevo', type: 'freemium', strategy: 'managed',
@@ -35,6 +40,7 @@ export const email = {
       entry: '$25/mo Starter (20k)', url: 'https://www.brevo.com/pricing/',
       gotcha: 'Doubles as a newsletter tool so one bill covers both; template editor feels like 2014 because it is.',
       cost: { hobby: 0, launched: 25, scaling: 65 },
+      exit: 'sticky', exitNote: 'Templates, contact lists and automation flows live in the tool.',
     },
     none: {
       name: 'No email', type: 'none', strategy: null,
@@ -57,6 +63,7 @@ export const search = {
       entry: 'Cloud ~$7–30/mo · or ~$5 VPS', url: 'https://cloud.typesense.org/',
       gotcha: 'HA means 3 nodes = 3× base cost, and RAM is sized to your dataset. The OSS build is the free path.',
       cost: { hobby: 5, launched: 10, scaling: 60 },
+      exit: 'easy', exitNote: 'Reindex from the source of truth: a search index is disposable.',
     },
     algolia: {
       name: 'Algolia', type: 'freemium', strategy: 'managed',
@@ -64,6 +71,7 @@ export const search = {
       entry: 'usage-based, ~$0.50 per 1k searches', url: 'https://www.algolia.com/pricing',
       gotcha: 'Overages bill at 1.5–2×, and search-as-you-type multiplies request counts fast.',
       cost: { hobby: 0, launched: 15, scaling: 100 },
+      exit: 'sticky', exitNote: 'Ranking rules, synonyms and analytics are Algolia config you rebuild by hand.',
     },
     meilisearch: {
       name: 'Meilisearch', type: 'oss', strategy: 'oss',
@@ -71,6 +79,7 @@ export const search = {
       entry: 'Cloud ~$30/mo · or ~$5 VPS', url: 'https://www.meilisearch.com/pricing',
       gotcha: '"Free Meilisearch" = self-host only. Cloud starts paid, unlike Algolia there is no free ladder.',
       cost: { hobby: 5, launched: 30, scaling: 90 },
+      exit: 'easy', exitNote: 'Reindex from source: the index is disposable.',
     },
     pgfts: {
       name: 'Postgres full-text search', type: 'oss', strategy: 'oss', freeTier: true,
@@ -78,6 +87,7 @@ export const search = {
       entry: '$0', url: 'https://www.postgresql.org/docs/current/textsearch.html',
       gotcha: 'No typo tolerance or relevance tuning, and every query burns your DB CPU. Fine to ~100k rows.',
       cost: { hobby: 0, launched: 0, scaling: 0 },
+      exit: 'easy', exitNote: 'It is your database: nothing extra to leave.',
     },
     none: {
       name: 'No search', type: 'none', strategy: null,
@@ -100,6 +110,8 @@ export const analytics = {
       entry: 'PAYG from ~$0.00005/event past 1M', url: 'https://posthog.com/pricing',
       gotcha: 'Each product bills separately: set per-product billing limits on day one or a retry storm invoices you.',
       cost: { hobby: 0, launched: 0, scaling: 65 },
+      exit: 'easy', exitNote: 'Swap the snippet; history export exists and is rarely worth moving.',
+      rule: 'Set per-product billing limits on day one: PostHog bills each product separately.',
     },
     ga4: {
       name: 'Google Analytics 4', type: 'freemium', strategy: 'managed',
@@ -107,6 +119,8 @@ export const analytics = {
       entry: '$0', url: 'https://marketingplatform.google.com/about/analytics/',
       gotcha: '2–14 month retention and consent-banner homework. Free because you are the product.',
       cost: { hobby: 0, launched: 0, scaling: 0 },
+      exit: 'easy', exitNote: 'Abandon the history, swap the snippet.',
+      rule: 'Ship the consent banner with the first deploy: GA4 without consent is a GDPR problem in the EU.',
     },
     umami: {
       name: 'Umami', type: 'freemium', strategy: 'oss',
@@ -114,6 +128,7 @@ export const analytics = {
       entry: '$20/mo Pro (1M events) · or ~$5 VPS', url: 'https://umami.is/pricing',
       gotcha: 'Free Hobby tier keeps only 6 months of history. Self-host if the data matters long-term.',
       cost: { hobby: 0, launched: 5, scaling: 20 },
+      exit: 'easy', exitNote: 'The self-host version takes a standard export; the snippet swap is trivial.',
     },
     plausible: {
       name: 'Plausible', type: 'paid', strategy: 'managed',
@@ -121,6 +136,7 @@ export const analytics = {
       entry: '$9/mo (10k pageviews)', url: 'https://plausible.io/pricing',
       gotcha: 'Price scales steeply with pageviews: $69/mo at 1M. You pay for privacy with money instead of consent banners.',
       cost: { hobby: 9, launched: 9, scaling: 69 },
+      exit: 'easy', exitNote: 'Snippet swap; the history stays behind.',
     },
     cfanalytics: {
       name: 'Cloudflare Web Analytics', type: 'freemium', strategy: 'managed', freeTier: true,
@@ -128,6 +144,7 @@ export const analytics = {
       entry: '$0', url: 'https://www.cloudflare.com/web-analytics/',
       gotcha: 'Pageviews only: no custom events, funnels, or users. Pairs well as the free baseline next to PostHog.',
       cost: { hobby: 0, launched: 0, scaling: 0 },
+      exit: 'easy', exitNote: 'Nothing to move: it never stored per-user data.',
     },
   },
 };
@@ -144,6 +161,8 @@ export const monitoring = {
       entry: '$26/mo Team (50k errors)', url: 'https://sentry.io/pricing/',
       gotcha: 'Pay-as-you-go overages explode during retry storms, set a spend cap before your first outage does.',
       cost: { hobby: 0, launched: 26, scaling: 80 },
+      exit: 'easy', exitNote: 'Error history is disposable: swap the SDK and move on.',
+      rule: 'Set the spend cap before the first outage: retry storms are how free tiers become invoices.',
     },
     betterstack: {
       name: 'Better Stack', type: 'freemium', strategy: 'managed',
@@ -151,6 +170,7 @@ export const monitoring = {
       entry: '~$21/mo (50 monitors)', url: 'https://betterstack.com/pricing',
       gotcha: 'Free tier alerts by email only: phone/SMS wake-ups need paid responder seats at $29 each.',
       cost: { hobby: 0, launched: 21, scaling: 60 },
+      exit: 'easy', exitNote: 'Monitors and status pages re-declare in an afternoon.',
     },
     uptimerobot: {
       name: 'UptimeRobot', type: 'freemium', strategy: 'managed',
@@ -158,6 +178,8 @@ export const monitoring = {
       entry: '$7/mo Solo (60-sec checks)', url: 'https://uptimerobot.com/pricing',
       gotcha: 'The famous free plan went non-commercial-only in late 2024. A business on it is a ToS violation.',
       cost: { hobby: 0, launched: 7, scaling: 15 },
+      exit: 'easy', exitNote: 'Monitor lists rebuild in minutes anywhere.',
+      rule: 'A commercial product needs the paid plan: the free tier is non-commercial by ToS.',
     },
     grafana: {
       name: 'Grafana Cloud', type: 'freemium', strategy: 'oss',
@@ -165,6 +187,7 @@ export const monitoring = {
       entry: '~$19/mo + usage', url: 'https://grafana.com/pricing/',
       gotcha: 'Usage pricing spirals with label cardinality. One user_id label and the invoice has a comma.',
       cost: { hobby: 0, launched: 19, scaling: 70 },
+      exit: 'easy', exitNote: 'Dashboards export as JSON; metrics history is the part you leave.',
     },
     none: {
       name: 'No monitoring', type: 'none', strategy: null,
@@ -187,6 +210,8 @@ export const cms = {
       entry: '$0', url: 'https://decapcms.org/',
       gotcha: 'No database: every edit is a commit that triggers a rebuild. Non-technical editors will need hand-holding.',
       cost: { hobby: 0, launched: 0, scaling: 0 },
+      exit: 'easy', exitNote: 'The content is already markdown in your repo.',
+      rule: 'Protect main with preview builds: every editor typo is a deploy.',
     },
     sanity: {
       name: 'Sanity', type: 'freemium', strategy: 'managed',
@@ -194,6 +219,7 @@ export const cms = {
       entry: '$15/seat/mo Growth', url: 'https://www.sanity.io/pricing',
       gotcha: 'Per-seat pricing + API overages compound: a 10-editor newsroom is a real monthly line.',
       cost: { hobby: 0, launched: 15, scaling: 75 },
+      exit: 'sticky', exitNote: 'Portable Text and GROQ queries rewrite on the way out.',
     },
     strapi: {
       name: 'Strapi (self-host)', type: 'oss', strategy: 'oss',
@@ -201,6 +227,7 @@ export const cms = {
       entry: 'Cloud ~$29/mo · or ~$7 VPS', url: 'https://strapi.io/pricing-cloud',
       gotcha: 'Cloud deleted free projects Sept 2026: self-host or pay. SSO/audit logs gated behind a separate license.',
       cost: { hobby: 7, launched: 12, scaling: 40 },
+      exit: 'easy', exitNote: 'It sits on your database; the admin UI is replaceable.',
     },
     payload: {
       name: 'Payload CMS (self-host)', type: 'oss', strategy: 'oss',
@@ -208,6 +235,7 @@ export const cms = {
       entry: 'Cloud ~$35/mo (signups paused)', url: 'https://payloadcms.com/cloud-pricing',
       gotcha: 'Acquired by Figma in 2025: the MIT repo is safe, the hosted roadmap is anyone\'s guess.',
       cost: { hobby: 7, launched: 12, scaling: 40 },
+      exit: 'easy', exitNote: 'Your database, your code: the CMS is a dependency, not a landlord.',
     },
     contentful: {
       name: 'Contentful', type: 'freemium', strategy: 'managed',
@@ -215,6 +243,7 @@ export const cms = {
       entry: '$300/mo Lite', url: 'https://www.contentful.com/pricing/',
       gotcha: 'The $0 → $300/mo cliff with nothing in between is the most famous pricing wall in CMS.',
       cost: { hobby: 0, launched: 300, scaling: 300 },
+      exit: 'rewrite', exitNote: 'The content model and delivery API are load-bearing everywhere content renders.',
     },
     airtable: {
       name: 'Airtable (base as CMS)', type: 'freemium', strategy: 'managed',
@@ -222,6 +251,8 @@ export const cms = {
       entry: '$20/user/mo Team', url: 'https://airtable.com/pricing',
       gotcha: 'No draft/publish, no revision history you can diff, no staging base. You build the status field, the preview and the cache yourself, and the 5 req/s API cap means you build the cache first.',
       cost: { hobby: 0, launched: 40, scaling: 90 },
+      exit: 'rewrite', exitNote: 'Rows export; the editorial workflow and interfaces do not.',
+      rule: 'Cache the base into your build: visitors never hit the Airtable API directly.',
     },
     none: {
       name: 'Hardcoded content', type: 'none', strategy: null,

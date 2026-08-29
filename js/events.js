@@ -2,7 +2,8 @@
 // Single delegated listener on #app. Every state mutation is
 // followed by save + hash-sync + full re-render.
 
-import { state, applyRecipe, applyStrategy, applyFreeTier, setPick, save, writeHash } from './state.js';
+import { state, applyRecipe, applyPreset, applyStrategy, applyFreeTier, setPick, pinCurrent, unpin as unpinStack, pinFromShare, save, writeHash } from './state.js';
+import { PRESETS } from './data-presets.js';
 import { renderApp } from './render.js';
 import { buildPrompt, buildFitPrompt } from './prompt.js';
 import { copyToClipboard, downloadFile, showToast, $ } from './utils.js';
@@ -60,6 +61,31 @@ const actions = {
     const ok = await copyToClipboard(location.href);
     showToast(ok ? 'Share link copied' : 'Copy failed: grab the URL from the address bar');
   },
+  preset(el) {
+    applyPreset(el.dataset.preset);
+    state.ui.openCat = null;
+    update();
+    const p = PRESETS[el.dataset.preset];
+    if (p) showToast(`Copying ${p.label}: the ${p.recipe} recipe, tuned`);
+  },
+  'pin-stack'() {
+    pinCurrent();
+    update();
+    showToast('Stack pinned: keep tweaking and watch the delta');
+  },
+  unpin() {
+    unpinStack();
+    update();
+  },
+  'compare-load'() {
+    const input = document.getElementById('compare-input');
+    if (pinFromShare(input && input.value)) {
+      update();
+      showToast('Baseline loaded from the share link');
+    } else {
+      showToast('That does not look like a Doorman share link');
+    }
+  },
 };
 
 export function bindEvents() {
@@ -80,6 +106,7 @@ export function bindEvents() {
     if (!el) return;
     applyRecipe(el.value);
     state.ui.openCat = null;
+    state.ui.preset = null; // a manual recipe change ends the preset framing
     update();
   });
 }

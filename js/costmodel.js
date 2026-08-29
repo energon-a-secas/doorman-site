@@ -87,6 +87,42 @@ export function buildTokens() {
   return Math.round(SIZE_TOKENS[recipe.size] * fe.tokenFactor);
 }
 
+/** The best-value model's row — the reference build cost everywhere. */
+export function qualityModel() {
+  const models = modelCosts();
+  return models.find(m => m.bestValue) || models[0];
+}
+
+/**
+ * The headline number: a year of running it at Launched, plus building
+ * it once on the best-value model. What year one actually costs.
+ */
+export function yearOneTotal() {
+  return 12 * infraTotals().launched + qualityModel().usd;
+}
+
+/** Infra totals for a saved config (the compare pin), not current state. */
+export function totalsForConfig(cfg) {
+  const totals = { hobby: 0, launched: 0, scaling: 0 };
+  const r = RECIPES[cfg.recipe] || RECIPES.blank;
+  for (const catKey of r.categories) {
+    const cat = CATEGORIES[catKey];
+    const opt = cat && cat.options[cfg.picks[catKey]];
+    if (!opt) continue; // 'bundled' sentinel or a pick that no longer exists
+    totals.hobby += opt.cost.hobby;
+    totals.launched += opt.cost.launched;
+    totals.scaling += opt.cost.scaling;
+  }
+  return totals;
+}
+
+/** Build tokens for a saved config, same math as buildTokens(). */
+export function buildTokensForConfig(cfg) {
+  const recipe = RECIPES[cfg.recipe] || RECIPES.blank;
+  const fe = FRONTENDS[cfg.frontend] || FRONTENDS.tailwind;
+  return Math.round(SIZE_TOKENS[recipe.size] * fe.tokenFactor);
+}
+
 /**
  * One-time build cost across all tracked models, cheapest first:
  * [ { key, name, provider, usd, note, cheapest, bestValue } ].
@@ -118,4 +154,29 @@ export function activeGotchas() {
     }
   }
   return out;
+}
+
+/** Build rules imposed by the current picks (for the prompt's constraints). */
+export function activeRules() {
+  const out = [];
+  for (const catKey of activeCategories()) {
+    const pick = currentPick(catKey);
+    if (pick && pick.rule && pick.type !== 'none') {
+      out.push({ from: pick.name, text: pick.rule });
+    }
+  }
+  return out;
+}
+
+/** Exit ratings of the current picks, hardest exits first. */
+export function activeExits() {
+  const order = { rewrite: 0, sticky: 1, easy: 2 };
+  const out = [];
+  for (const catKey of activeCategories()) {
+    const pick = currentPick(catKey);
+    if (pick && pick.exit && pick.type !== 'none') {
+      out.push({ from: pick.name, grade: pick.exit, note: pick.exitNote });
+    }
+  }
+  return out.sort((a, b) => order[a.grade] - order[b.grade]);
 }

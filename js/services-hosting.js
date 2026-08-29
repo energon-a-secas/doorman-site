@@ -14,6 +14,8 @@ export const hosting = {
       entry: '$5/mo Workers Paid', url: 'https://pages.cloudflare.com/',
       gotcha: 'Static is unbeatable; long-running server work needs Durable Objects or a real backend elsewhere.',
       cost: { hobby: 0, launched: 5, scaling: 25 },
+      exit: 'easy', exitNote: 'Static assets move anywhere in an afternoon; rewriting Workers code is the sticky part.',
+      rule: 'Keep server work inside Workers limits: anything slow or stateful belongs in the backend pick, not the edge.',
     },
     vercel: {
       name: 'Vercel', type: 'freemium', strategy: 'managed',
@@ -21,6 +23,8 @@ export const hosting = {
       entry: '$20/mo per member Pro', url: 'https://vercel.com/pricing',
       gotcha: 'Commercial use on Hobby is against ToS: the moment you charge users, you owe $20. Bandwidth overages sting.',
       cost: { hobby: 0, launched: 20, scaling: 100 },
+      exit: 'sticky', exitNote: 'Framework-specific serverless, image and edge APIs creep in; the more magic used, the harder the move.',
+      rule: 'The app charges money only after leaving the Hobby plan: budget the $20 before the first paying user.',
     },
     netlify: {
       name: 'Netlify', type: 'freemium', strategy: 'managed',
@@ -28,6 +32,8 @@ export const hosting = {
       entry: '$19/mo per member Pro', url: 'https://www.netlify.com/pricing/',
       gotcha: 'Bandwidth overages are billed automatically and have produced famous four-figure surprise bills.',
       cost: { hobby: 0, launched: 19, scaling: 90 },
+      exit: 'easy', exitNote: 'The static half moves free; redirects, forms and functions config are Netlify-shaped.',
+      rule: 'Set a bandwidth notification on day one: overages bill themselves.',
     },
     ghPages: {
       name: 'GitHub Pages', type: 'freemium', strategy: 'managed',
@@ -35,6 +41,8 @@ export const hosting = {
       entry: '$0', url: 'https://pages.github.com/',
       gotcha: 'Static only, no server code, soft 100 GB/mo bandwidth cap. Perfect for zero-cost recipes.',
       cost: { hobby: 0, launched: 0, scaling: 0 },
+      exit: 'easy', exitNote: 'It is a public repo serving files; the exit is a git remote.',
+      rule: 'The repo and bundle are public: no secrets in client code, and any key needs a proxy before it needs a name.',
     },
     render: {
       name: 'Render', type: 'freemium', strategy: 'managed',
@@ -42,6 +50,8 @@ export const hosting = {
       entry: '$7/mo Starter', url: 'https://render.com/pricing',
       gotcha: 'Free instances sleep: first hit takes ~30s. Fine for demos, embarrassing for products.',
       cost: { hobby: 0, launched: 7, scaling: 50 },
+      exit: 'easy', exitNote: 'Standard containers and Node services: point the Dockerfile somewhere else.',
+      rule: 'Free instances sleep: design the first request to survive a ~30s cold start, or pay for always-on before the demo.',
     },
     railway: {
       name: 'Railway', type: 'paid', strategy: 'managed',
@@ -49,6 +59,8 @@ export const hosting = {
       entry: '$5/mo Hobby (usage credit)', url: 'https://railway.com/pricing',
       gotcha: 'Pure usage billing: real bills routinely exceed the $5 floor once anything runs 24/7.',
       cost: { hobby: 5, launched: 12, scaling: 60 },
+      exit: 'easy', exitNote: 'Standard containers; the exit is a redeploy.',
+      rule: 'Set a usage alert at signup: the $5 floor is a floor, not a ceiling.',
     },
     vps: {
       name: 'VPS + Coolify/Dokploy', type: 'oss', strategy: 'oss',
@@ -56,6 +68,8 @@ export const hosting = {
       entry: '~$4–6/mo (Hetzner CX22, DO basic)', url: 'https://www.hetzner.com/cloud/',
       gotcha: 'One box = one point of failure. You own updates, backups, and the 3am disk-full page.',
       cost: { hobby: 5, launched: 9, scaling: 40 },
+      exit: 'easy', exitNote: 'It is your box: the exit is rsync and a DNS change.',
+      rule: 'Script the box from day one (backups, updates, firewall): the server is rebuildable, never precious.',
     },
   },
 };
@@ -72,6 +86,7 @@ export const queue = {
       entry: 'from ~$20/mo', url: 'https://www.inngest.com/pricing',
       gotcha: 'Step-based billing rewards chatty functions less than you think, still, count steps in loops.',
       cost: { hobby: 0, launched: 20, scaling: 75 },
+      exit: 'sticky', exitNote: 'Step functions and event names are Inngest-shaped; the logic ports, the orchestration rewrites.',
     },
     triggerdev: {
       name: 'Trigger.dev', type: 'freemium', strategy: 'managed',
@@ -79,6 +94,7 @@ export const queue = {
       entry: 'from ~$10/mo', url: 'https://trigger.dev/pricing',
       gotcha: 'Long-running AI tasks are its home turf; heavy parallel runs scale the bill fast.',
       cost: { hobby: 0, launched: 10, scaling: 60 },
+      exit: 'sticky', exitNote: 'Task definitions and queues are SDK-shaped; long tasks port as plain code.',
     },
     qstash: {
       name: 'Upstash QStash', type: 'freemium', strategy: 'managed',
@@ -86,6 +102,8 @@ export const queue = {
       entry: 'pay-as-you-go', url: 'https://upstash.com/pricing/qstash',
       gotcha: 'HTTP-based: your endpoint must be public and idempotent; retries multiply message counts.',
       cost: { hobby: 0, launched: 5, scaling: 30 },
+      exit: 'easy', exitNote: 'HTTP in, HTTP out: the exit is a URL swap.',
+      rule: 'Every handler must be idempotent: at-least-once delivery plus retries is the contract.',
     },
     sqs: {
       name: 'AWS SQS + Lambda', type: 'freemium', strategy: 'managed',
@@ -93,6 +111,8 @@ export const queue = {
       entry: '$0.40 per 1M requests', url: 'https://aws.amazon.com/sqs/pricing/',
       gotcha: 'Cheapest at scale and the most wiring: dead-letter queues and visibility timeouts are yours to configure.',
       cost: { hobby: 0, launched: 3, scaling: 25 },
+      exit: 'easy', exitNote: 'Standard queue semantics; the wiring moves, the IAM does not.',
+      rule: 'Configure the dead-letter queue before the first real job: a poison message loops forever without one.',
     },
     bullmq: {
       name: 'BullMQ + Redis (self-host)', type: 'oss', strategy: 'oss',
@@ -100,6 +120,7 @@ export const queue = {
       entry: '~$5 VPS or Upstash free tier', url: 'https://docs.bullmq.io/',
       gotcha: 'You run the workers, the dashboard, and the retry policy. Great DX, real ops burden.',
       cost: { hobby: 5, launched: 5, scaling: 15 },
+      exit: 'easy', exitNote: 'MIT library on your own Redis: it goes where Redis goes.',
     },
     none: {
       name: 'No background jobs', type: 'none', strategy: null,

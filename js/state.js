@@ -5,6 +5,7 @@
 
 import { CATEGORIES } from './data-services.js';
 import { RECIPES, FRONTENDS } from './data-recipes.js';
+import { PRESETS } from './data-presets.js';
 
 const STORAGE_KEY = 'doorman-cookbook-v1';
 const HASH_PREFIX = '#c=';
@@ -15,7 +16,8 @@ export const state = {
   frontend: 'tailwind',           // FRONTENDS key
   tier: 'launched',               // 'hobby' | 'launched' | 'scaling'
   usage: { visitors: '', users: '', storageGb: '' }, // fit-check inputs, string-typed (input values)
-  ui: { openCat: null },          // ephemeral — which category swap panel is open (never persisted)
+  pinned: null,                   // compare snapshot: { recipe, picks, frontend } | null
+  ui: { openCat: null, preset: null }, // ephemeral — open swap panel; active preset chip (never persisted)
 };
 
 const USAGE_DEFAULTS = { visitors: '', users: '', storageGb: '' };
@@ -47,6 +49,50 @@ export function applyRecipe(recipeKey) {
     const r = RECIPES[recipeKey];
     state.picks[catKey] = (r && r.defaults && r.defaults[catKey]) || defaultPick(catKey);
   }
+}
+
+/**
+ * Load a copy-a-real-site preset: its recipe, then its pick overrides
+ * (same bypass-setPick semantics as recipe defaults). The preset stays
+ * marked in state.ui until the next manual recipe change.
+ */
+export function applyPreset(presetKey) {
+  const p = PRESETS[presetKey];
+  if (!p) return;
+  applyRecipe(p.recipe);
+  if (p.picks) Object.assign(state.picks, p.picks);
+  if (p.frontend && FRONTENDS[p.frontend]) state.frontend = p.frontend;
+  state.ui.preset = presetKey;
+}
+
+// ── Compare pin ──────────────────────────────────────────────
+
+/** Snapshot the current stack as the comparison baseline. */
+export function pinCurrent() {
+  state.pinned = { recipe: state.recipe, picks: { ...state.picks }, frontend: state.frontend };
+}
+
+export function unpin() {
+  state.pinned = null;
+}
+
+/**
+ * Pin from a pasted share link (full URL or raw #c= hash). Returns
+ * true when it parsed into a valid config.
+ */
+export function pinFromShare(text) {
+  const i = (text || '').indexOf(HASH_PREFIX);
+  if (i === -1) return false;
+  try {
+    const saved = JSON.parse(decodeURIComponent(atob(text.slice(i + HASH_PREFIX.length).trim())));
+    if (!RECIPES[saved.recipe]) return false;
+    state.pinned = {
+      recipe: saved.recipe,
+      picks: (saved.picks && typeof saved.picks === 'object') ? saved.picks : {},
+      frontend: FRONTENDS[saved.frontend] ? saved.frontend : 'tailwind',
+    };
+    return true;
+  } catch { return false; }
 }
 
 /** Swap every category to its open-source or managed strategy pick. */
@@ -152,7 +198,7 @@ export function setPick(catKey, optKey) {
 
 // ── Persistence ──────────────────────────────────────────────
 
-const PERSIST_KEYS = ['recipe', 'picks', 'frontend', 'tier', 'usage'];
+const PERSIST_KEYS = ['recipe', 'picks', 'frontend', 'tier', 'usage', 'pinned'];
 
 export function loadSaved() {
   try {
