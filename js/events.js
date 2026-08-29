@@ -2,9 +2,9 @@
 // Single delegated listener on #app. Every state mutation is
 // followed by save + hash-sync + full re-render.
 
-import { state, applyRecipe, applyStrategy, setPick, save, writeHash } from './state.js';
+import { state, applyRecipe, applyStrategy, applyFreeTier, setPick, save, writeHash } from './state.js';
 import { renderApp } from './render.js';
-import { buildPrompt } from './prompt.js';
+import { buildPrompt, buildFitPrompt } from './prompt.js';
 import { copyToClipboard, downloadFile, showToast, $ } from './utils.js';
 
 function update() {
@@ -15,9 +15,12 @@ function update() {
 
 const actions = {
   strategy(el) {
-    applyStrategy(el.dataset.strategy);
+    const s = el.dataset.strategy;
+    if (s === 'free') applyFreeTier();
+    else applyStrategy(s);
     update();
-    showToast(el.dataset.strategy === 'oss' ? 'Swapped to the open-source stack' : 'Swapped to the managed stack');
+    showToast(s === 'free' ? 'Swapped to free tiers: the Hobby column is your bill'
+      : s === 'oss' ? 'Swapped to the open-source stack' : 'Swapped to the managed stack');
   },
   'toggle-cat'(el) {
     const cat = el.dataset.cat;
@@ -38,16 +41,24 @@ const actions = {
   },
   async 'copy-prompt'() {
     const ok = await copyToClipboard(buildPrompt());
-    showToast(ok ? 'Prompt copied — go cook' : 'Copy failed — select the text manually');
+    showToast(ok ? 'Prompt copied: go cook' : 'Copy failed: select the text manually');
   },
   'download-prompt'() {
     downloadFile(`doorman-${state.recipe}-recipe.md`, buildPrompt());
     showToast('Recipe downloaded');
   },
+  async 'copy-fit'() {
+    const ok = await copyToClipboard(buildFitPrompt());
+    showToast(ok ? 'Fit check copied: hand it to a research agent' : 'Copy failed: select the text manually');
+  },
+  'download-fit'() {
+    downloadFile(`doorman-${state.recipe}-fitcheck.md`, buildFitPrompt());
+    showToast('Fit check downloaded');
+  },
   async 'share-link'() {
     writeHash();
     const ok = await copyToClipboard(location.href);
-    showToast(ok ? 'Share link copied' : 'Copy failed — grab the URL from the address bar');
+    showToast(ok ? 'Share link copied' : 'Copy failed: grab the URL from the address bar');
   },
 };
 
@@ -59,6 +70,12 @@ export function bindEvents() {
     if (fn) fn(el);
   });
   $('app').addEventListener('change', (e) => {
+    const usage = e.target.closest('input[data-action="usage"]');
+    if (usage) {
+      state.usage[usage.dataset.field] = usage.value;
+      update();
+      return;
+    }
     const el = e.target.closest('select[data-action="recipe-select"]');
     if (!el) return;
     applyRecipe(el.value);

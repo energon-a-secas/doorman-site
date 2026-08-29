@@ -7,7 +7,7 @@
 import { CATEGORIES } from './data-services.js';
 import { RECIPES, FRONTENDS } from './data-recipes.js';
 import { AI_MODELS, SIZE_TOKENS, buildCostUsd, SUBSCRIPTION_PATH } from './data-models.js';
-import { state, activeCategories, currentPick, bundlerFor } from './state.js';
+import { state, activeCategories, currentPick, bundlerFor, freeTierPicks } from './state.js';
 
 /**
  * Per-category cost rows for the current picks.
@@ -20,7 +20,7 @@ export function infraRows() {
     const pick = currentPick(catKey);
     if (!pick) {
       const b = bundlerFor(catKey);
-      rows.push({ catKey, label: cat.label, name: b ? b.name : '—', bundled: true, cost: { hobby: 0, launched: 0, scaling: 0 } });
+      rows.push({ catKey, label: cat.label, name: b ? b.name : '-', bundled: true, cost: { hobby: 0, launched: 0, scaling: 0 } });
       continue;
     }
     rows.push({ catKey, label: cat.label, name: pick.name, type: pick.type, bundled: false, cost: pick.cost });
@@ -58,6 +58,24 @@ export function strategyTotals(strategy) {
     totals.hobby += hit[1].cost.hobby;
     totals.launched += hit[1].cost.launched;
     totals.scaling += hit[1].cost.scaling;
+  }
+  return totals;
+}
+
+/**
+ * What the free-tier quick-swap would cost, computed hypothetically
+ * without touching state. Bundle-aware via freeTierPicks, so a claimed
+ * category contributes $0 the same way it would after the swap.
+ */
+export function freeTotals() {
+  const totals = { hobby: 0, launched: 0, scaling: 0 };
+  const picks = freeTierPicks();
+  for (const catKey of Object.keys(picks)) {
+    const opt = CATEGORIES[catKey].options[picks[catKey]];
+    if (!opt) continue; // 'bundled' sentinel: absorbed into its bundler's bill
+    totals.hobby += opt.cost.hobby;
+    totals.launched += opt.cost.launched;
+    totals.scaling += opt.cost.scaling;
   }
   return totals;
 }

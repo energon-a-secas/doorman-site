@@ -9,9 +9,9 @@ export const storage = {
   blurb: 'Images, uploads, backups. Egress fees are the silent killer.',
   options: {
     r2: {
-      name: 'Cloudflare R2', type: 'freemium', strategy: 'managed', recommended: true,
+      name: 'Cloudflare R2', type: 'freemium', strategy: 'managed', recommended: true, freeTier: true,
       free: '10 GB storage, generous free operations/mo',
-      entry: '$0.015/GB-mo — ZERO egress fees', url: 'https://developers.cloudflare.com/r2/pricing/',
+      entry: '$0.015/GB-mo: ZERO egress fees', url: 'https://developers.cloudflare.com/r2/pricing/',
       gotcha: 'Class A/B operation pricing means list-heavy apps pay for chatter, not bytes. S3-compatible API.',
       cost: { hobby: 0, launched: 3, scaling: 20 },
     },
@@ -33,20 +33,20 @@ export const storage = {
       name: 'Cloudinary', type: 'freemium', strategy: 'managed',
       free: '~25 credits/mo (storage + transformations + bandwidth)',
       entry: '$99/mo Plus', url: 'https://cloudinary.com/pricing',
-      gotcha: 'The jump from free to $99 is a cliff — the image pipeline is magic until the invoice arrives.',
+      gotcha: 'The jump from free to $99 is a cliff: the image pipeline is magic until the invoice arrives.',
       cost: { hobby: 0, launched: 99, scaling: 250 },
     },
     minio: {
       name: 'MinIO (self-host)', type: 'oss', strategy: 'oss',
-      free: 'Open source (AGPL) — you pay for the box + disk',
+      free: 'Open source (AGPL): you pay for the box + disk',
       entry: '~$5–8 VPS', url: 'https://min.io/',
-      gotcha: 'S3-compatible and solid, but you own redundancy — one dying disk is a data-loss ticket.',
+      gotcha: 'S3-compatible and solid, but you own redundancy. One dying disk is a data-loss ticket.',
       cost: { hobby: 6, launched: 10, scaling: 40 },
     },
     none: {
       name: 'No file storage', type: 'none', strategy: null,
       free: '', entry: '$0', url: '',
-      gotcha: 'No user uploads. Ships more recipes than people admit — avatars can wait.',
+      gotcha: 'No user uploads. Ships more recipes than people admit, avatars can wait.',
       cost: { hobby: 0, launched: 0, scaling: 0 },
     },
   },
@@ -59,15 +59,15 @@ export const cdn = {
   blurb: 'Edge caching, DDoS shield, TLS. Cloudflare rewrote this market.',
   options: {
     cloudflare: {
-      name: 'Cloudflare', type: 'freemium', strategy: 'managed', recommended: true,
-      free: 'Unlimited bandwidth CDN + DDoS protection + SSL — free plan',
+      name: 'Cloudflare', type: 'freemium', strategy: 'managed', recommended: true, freeTier: true,
+      free: 'Unlimited bandwidth CDN + DDoS protection + SSL, free plan',
       entry: '$20/mo Pro', url: 'https://www.cloudflare.com/plans/',
       gotcha: 'The free plan is genuinely absurd value; the paid features (WAF rules, image resizing) are the hook.',
       cost: { hobby: 0, launched: 0, scaling: 20 },
     },
     bunny: {
       name: 'Bunny CDN', type: 'paid', strategy: 'managed',
-      free: 'No free tier — $1/mo minimum',
+      free: 'No free tier: $1/mo minimum',
       entry: '~$0.01/GB (EU/NA)', url: 'https://bunny.net/pricing/',
       gotcha: 'Famous $0.01/GB pricing; storage + optimizer are add-ons that sneak onto the bill.',
       cost: { hobby: 1, launched: 5, scaling: 30 },
@@ -89,8 +89,45 @@ export const cdn = {
     none: {
       name: 'No CDN', type: 'none', strategy: null,
       free: '', entry: '$0', url: '',
-      gotcha: 'Origin serves everything — fine for local audiences, painful across oceans.',
+      gotcha: 'Origin serves everything: fine for local audiences, painful across oceans.',
       cost: { hobby: 0, launched: 0, scaling: 0 },
+    },
+  },
+};
+
+export const domains = {
+  key: 'domains',
+  label: 'Domain & DNS',
+  icon: 'atsign',
+  blurb: 'The address. In a free stack this is usually the only real bill: ~$10/yr, and a DNS API makes deploys scriptable.',
+  options: {
+    platformsub: {
+      name: 'Platform subdomain (*.github.io / *.pages.dev)', type: 'freemium', strategy: 'managed', freeTier: true,
+      free: 'Included with the host: HTTPS, no renewal, no bill, forever',
+      entry: '$0', url: 'https://pages.github.com/',
+      gotcha: 'Moving to a real domain later resets SEO and breaks every link ever shared. Decide before launch, not after; the subdomain names the platform, not you.',
+      cost: { hobby: 0, launched: 0, scaling: 0 },
+    },
+    porkbun: {
+      name: 'Porkbun', type: 'paid', strategy: 'managed', recommended: true,
+      free: 'No free tier. WHOIS privacy and API access included on every domain',
+      entry: '~$11/yr for a .com (billed yearly)', url: 'https://porkbun.com/products/domains',
+      gotcha: 'First-year sale prices are the bait: check the renewal column before falling for a $3 TLD that renews at $40.',
+      cost: { hobby: 1, launched: 1, scaling: 1 },
+    },
+    cloudflareReg: {
+      name: 'Cloudflare Registrar', type: 'paid', strategy: 'managed',
+      free: 'No free tier. At-cost wholesale pricing, renewals never marked up',
+      entry: '~$10/yr for a .com (billed yearly)', url: 'https://www.cloudflare.com/products/registrar/',
+      gotcha: 'Registrar requires Cloudflare nameservers, so DNS lives there or the domain does not. The DNS API is first-class; the domain is the lock-in.',
+      cost: { hobby: 1, launched: 1, scaling: 1 },
+    },
+    namecheap: {
+      name: 'Namecheap', type: 'paid', strategy: 'managed',
+      free: 'No free tier. Cheap first year, WHOIS privacy included',
+      entry: '~$14/yr .com renewal', url: 'https://www.namecheap.com/domains/',
+      gotcha: 'The DNS API is gated: enabling it requires 20+ domains, a $50+ balance, or $50+ spent recently. If scripted DNS is the plan, check eligibility before buying the name.',
+      cost: { hobby: 1, launched: 1, scaling: 1 },
     },
   },
 };

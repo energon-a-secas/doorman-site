@@ -14,8 +14,17 @@ export const state = {
   picks: {},                      // { [categoryKey]: optionKey } — only categories in the recipe
   frontend: 'tailwind',           // FRONTENDS key
   tier: 'launched',               // 'hobby' | 'launched' | 'scaling'
+  usage: { visitors: '', users: '', storageGb: '' }, // fit-check inputs, string-typed (input values)
   ui: { openCat: null },          // ephemeral — which category swap panel is open (never persisted)
 };
+
+const USAGE_DEFAULTS = { visitors: '', users: '', storageGb: '' };
+
+/** Restore usage shape after loading old saves/hashes that predate it. */
+function normalizeUsage() {
+  const u = (state.usage && typeof state.usage === 'object') ? state.usage : {};
+  state.usage = { ...USAGE_DEFAULTS, ...u };
+}
 
 /** Categories relevant to the current recipe, in display order. */
 export function activeCategories() {
@@ -55,6 +64,37 @@ export function applyStrategy(strategy) {
     }
     setPick(catKey, hit[0]);
   }
+}
+
+/**
+ * Hypothetical free-tier pick per active category: the option flagged
+ * `freeTier`, else the first $0-at-hobby option, else 'none', else the
+ * cheapest at hobby. Bundle-aware in the opposite direction from
+ * applyStrategy: a category claimed by a free bundler STAYS bundled,
+ * because fewest vendors is the point of the free path.
+ */
+export function freeTierPicks() {
+  const picks = {};
+  const claimed = new Set();
+  const cats = activeCategories();
+  for (const catKey of cats) {
+    const opts = CATEGORIES[catKey].options;
+    const entries = Object.entries(opts).filter(([k, o]) => k !== 'none' && o.type !== 'none');
+    const hit = entries.find(([, o]) => o.freeTier)
+      || entries.find(([, o]) => o.cost.hobby === 0)
+      || (opts.none ? ['none'] : [...entries].sort((a, b) => a[1].cost.hobby - b[1].cost.hobby)[0]);
+    picks[catKey] = hit[0];
+    const bundles = opts[hit[0]] && opts[hit[0]].bundles;
+    if (bundles) for (const b of bundles) if (cats.includes(b)) claimed.add(b);
+  }
+  for (const c of claimed) picks[c] = 'bundled';
+  return picks;
+}
+
+/** The third quick-swap: every category to its free-tier pick, viewed at Hobby. */
+export function applyFreeTier() {
+  state.picks = freeTierPicks();
+  state.tier = 'hobby';
 }
 
 /** Currently selected option object for a category. */
@@ -112,7 +152,7 @@ export function setPick(catKey, optKey) {
 
 // ── Persistence ──────────────────────────────────────────────
 
-const PERSIST_KEYS = ['recipe', 'picks', 'frontend', 'tier'];
+const PERSIST_KEYS = ['recipe', 'picks', 'frontend', 'tier', 'usage'];
 
 export function loadSaved() {
   try {
@@ -122,6 +162,7 @@ export function loadSaved() {
     for (const k of PERSIST_KEYS) if (k in saved) state[k] = saved[k];
     if (!RECIPES[state.recipe] && state.recipe !== 'blank') state.recipe = 'saas';
     if (!FRONTENDS[state.frontend]) state.frontend = 'tailwind';
+    normalizeUsage();
     return true;
   } catch { return false; }
 }
@@ -153,6 +194,7 @@ export function loadHash() {
     const saved = JSON.parse(decodeURIComponent(atob(location.hash.slice(HASH_PREFIX.length))));
     for (const k of PERSIST_KEYS) if (k in saved) state[k] = saved[k];
     if (!RECIPES[state.recipe] && state.recipe !== 'blank') return false;
+    normalizeUsage();
     return true;
   } catch { return false; }
 }

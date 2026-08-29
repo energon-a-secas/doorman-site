@@ -3,12 +3,12 @@
 
 import { hosting, queue } from './services-hosting.js';
 import { database, realtime, aiApi } from './services-data.js';
-import { storage, cdn } from './services-edge.js';
+import { storage, cdn, domains } from './services-edge.js';
 import { auth, payments } from './services-identity.js';
 import { email, search, analytics, monitoring, cms } from './services-ops.js';
 
 export const CATEGORIES = {
-  hosting, database, auth, storage, cdn, realtime, queue,
+  hosting, database, auth, storage, cdn, domains, realtime, queue,
   email, search, cms, payments, analytics, monitoring, aiApi,
 };
 

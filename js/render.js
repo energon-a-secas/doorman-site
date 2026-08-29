@@ -6,8 +6,8 @@ import { CATEGORIES, TYPE_META } from './data-services.js';
 import { RECIPES, FRONTENDS, TIERS } from './data-recipes.js';
 import { SIZE_LABELS } from './data-models.js';
 import { state, activeCategories, currentPick, bundlerFor } from './state.js';
-import { infraRows, infraTotals, strategyTotals, buildTokens, modelCosts, subscriptionPath, activeGotchas } from './costmodel.js';
-import { buildPrompt } from './prompt.js';
+import { infraRows, infraTotals, strategyTotals, freeTotals, buildTokens, modelCosts, subscriptionPath, activeGotchas } from './costmodel.js';
+import { buildPrompt, buildFitPrompt } from './prompt.js';
 import { escHtml, fmtUsd, fmtTokens, $ } from './utils.js';
 import { icon, favicon } from './icons.js';
 
@@ -24,16 +24,19 @@ function renderRecipes() {
   const models = modelCosts();
   const quality = models.find(m => m.bestValue) || models[0];
 
-  const options = Object.entries(RECIPES).map(([key, rr]) =>
-    `<option value="${key}"${key === state.recipe ? ' selected' : ''}>${escHtml(rr.label)} — ${SIZE_LABELS[rr.size]} · ${rr.categories.length} ingredients</option>`
-  ).join('');
+  const opt = ([key, rr]) =>
+    `<option value="${key}"${key === state.recipe ? ' selected' : ''}>${escHtml(rr.label)}, ${SIZE_LABELS[rr.size]} · ${rr.categories.length} ingredients</option>`;
+  const entries = Object.entries(RECIPES);
+  const options =
+    `<optgroup label="Product stacks">${entries.filter(([, rr]) => !rr.budget).map(opt).join('')}</optgroup>` +
+    `<optgroup label="Almost free: the bill is a domain, or nothing">${entries.filter(([, rr]) => rr.budget).map(opt).join('')}</optgroup>`;
 
   return `
     <section class="step" aria-labelledby="s1">
       <div class="step-head">
         <span class="step-head__n">1</span>
         <h2 class="step-head__title" id="s1">Pick a recipe</h2>
-        <p class="step-head__lead">The archetype decides which ingredients you need — and its size drives the AI build estimate.</p>
+        <p class="step-head__lead">The archetype decides which ingredients you need, and its size drives the AI build estimate.</p>
       </div>
       <div class="recipe-bar">
         <span class="recipe-bar__icon">${icon(r.icon)}</span>
@@ -58,7 +61,7 @@ function renderAlt(catKey, optKey, o, isCurrent) {
   const free = o.free ? `<span class="alt__line alt__free"><strong>Free tier:</strong> ${escHtml(o.free)}</span>` : '';
   const rev = o.revshare ? `<span class="alt__line"><strong>Cut:</strong> ${escHtml(o.revshare)}</span>` : '';
   const bundles = o.bundles
-    ? `<span class="alt__line"><strong>Absorbs:</strong> ${o.bundles.map(b => CATEGORIES[b].label).join(', ')} — one bill, many jobs</span>` : '';
+    ? `<span class="alt__line"><strong>Absorbs:</strong> ${o.bundles.map(b => CATEGORIES[b].label).join(', ')}. One bill, many jobs</span>` : '';
   const action = isCurrent
     ? `<span class="badge badge--rec">In the stack</span>`
     : `<button class="btn btn--sm btn--secondary" data-action="pick" data-cat="${catKey}" data-opt="${optKey}">Use this</button>`;
@@ -89,7 +92,7 @@ function renderIngredient(catKey) {
     pickHtml = `<span class="ing__pick">${favicon(pick.url)}${escHtml(pick.name)} ${badge(pick.type)}</span>`;
     costHtml = `<span class="ing__cost">${fmtUsd(pick.cost[state.tier])}/mo<small>${TIERS[state.tier].label}</small></span>`;
   } else {
-    pickHtml = `<span class="ing__pick">—</span>`;
+    pickHtml = `<span class="ing__pick">-</span>`;
     costHtml = '';
   }
 
@@ -105,7 +108,7 @@ function renderIngredient(catKey) {
       <div class="ing__alts">
         <div class="alt-group alt-group--oss">
           <span class="alt-group__title">Open source / self-host</span>
-          ${oss.length ? oss.map(([k, o]) => renderAlt(catKey, k, o, k === currentKey)).join('') : '<span class="alt__line">No self-host path here — this one is a service.</span>'}
+          ${oss.length ? oss.map(([k, o]) => renderAlt(catKey, k, o, k === currentKey)).join('') : '<span class="alt__line">No self-host path here. This one is a service.</span>'}
         </div>
         <div class="alt-group alt-group--managed">
           <span class="alt-group__title">Managed / pay-to-win</span>
@@ -145,7 +148,7 @@ function renderFrontend() {
 
   return `
     <div class="subsection" style="margin-top: var(--space-6);">
-      <h3 class="step-head__title" style="font-size: var(--text-base); margin-bottom: var(--space-3);">Frontend — pick your compromise</h3>
+      <h3 class="step-head__title" style="font-size: var(--text-base); margin-bottom: var(--space-3);">Frontend, pick your compromise</h3>
       <div class="fe-grid">${cards}</div>
     </div>`;
 }
@@ -158,6 +161,7 @@ function renderStack() {
         <h2 class="step-head__title" id="s2">The stack</h2>
         <span class="step-head__aside">
           <span class="switch" role="group" aria-label="Strategy quick-swap">
+            <button class="switch__btn switch__btn--free" data-action="strategy" data-strategy="free" title="Cheapest pick per category: the whole stack on free tiers, viewed at Hobby">Free tier</button>
             <button class="switch__btn switch__btn--oss" data-action="strategy" data-strategy="oss">All open-source</button>
             <button class="switch__btn switch__btn--paid" data-action="strategy" data-strategy="managed">All managed</button>
           </span>
@@ -178,6 +182,7 @@ function renderCosts() {
   const totals = infraTotals();
   const ossTotal = strategyTotals('oss');
   const managedTotal = strategyTotals('managed');
+  const freeTotal = freeTotals();
   const tokens = buildTokens();
   const models = modelCosts();
   const sub = subscriptionPath();
@@ -210,11 +215,11 @@ function renderCosts() {
             ${tierBtn('hobby')}${tierBtn('launched')}${tierBtn('scaling')}
           </span>
         </span>
-        <p class="step-head__lead">${escHtml(TIERS[t].note)} All-OSS swap: ~${fmtUsd(ossTotal[t])}/mo · all-managed: ~${fmtUsd(managedTotal[t])}/mo.</p>
+        <p class="step-head__lead">${escHtml(TIERS[t].note)} Free-tier swap: ~${fmtUsd(freeTotal[t])}/mo · all-OSS: ~${fmtUsd(ossTotal[t])}/mo · all-managed: ~${fmtUsd(managedTotal[t])}/mo.</p>
       </div>
       <div class="cost-grid">
         <div class="cost-card">
-          <h3 class="cost-card__title">Run it — infra per month</h3>
+          <h3 class="cost-card__title">Run it: infra per month</h3>
           <p class="cost-card__sub">Estimates from free-tier limits + entry plans, July 2026. Confirm on the linked pages.</p>
           <table class="cost-table">
             <thead><tr><th>Ingredient</th><th>Hobby</th><th>Launched</th><th>Scaling</th></tr></thead>
@@ -227,13 +232,13 @@ function renderCosts() {
           </div>
         </div>
         <div class="cost-card">
-          <h3 class="cost-card__title">Build it — one-time AI cost</h3>
+          <h3 class="cost-card__title">Build it: one-time AI cost</h3>
           <p class="cost-card__sub">~${fmtTokens(tokens)} tokens for a ${SIZE_LABELS[RECIPES[state.recipe].size].toLowerCase()} build with the ${escHtml(FRONTENDS[state.frontend].label)} frontend (3:1 input:output blend).</p>
           <table class="model-table">
             <thead><tr><th>Model</th><th>Provider</th><th>Build cost</th></tr></thead>
             <tbody>${modelBody}</tbody>
           </table>
-          <div class="sub-note"><strong>Or subscribe:</strong> ${escHtml(sub.plan)} (~$${sub.usd}/mo) — ${escHtml(sub.note)}</div>
+          <div class="sub-note"><strong>Or subscribe:</strong> ${escHtml(sub.plan)} (~$${sub.usd}/mo), ${escHtml(sub.note)}</div>
           <p class="cost-note">Best value = quality-per-dollar right now. Prompt-cache hits and batch mode push real API cost 50–90% lower.</p>
         </div>
       </div>
@@ -250,7 +255,7 @@ function renderChallenges() {
       <div class="step-head">
         <span class="step-head__n">4</span>
         <h2 class="step-head__title" id="s4">The hard parts</h2>
-        <p class="step-head__lead">What this recipe hides from you — plus the fine print on every ingredient you picked.</p>
+        <p class="step-head__lead">What this recipe hides from you, plus the fine print on every ingredient you picked.</p>
       </div>
       <div class="chal-grid">
         <div>
@@ -274,20 +279,50 @@ function renderChallenges() {
 
 // ── Step 5: export ───────────────────────────────────────────
 
+function usageField(label, field, placeholder) {
+  const v = state.usage[field];
+  return `
+    <label class="usage-field">
+      <span>${escHtml(label)}</span>
+      <input type="number" min="0" inputmode="numeric" placeholder="${escHtml(placeholder)}"
+        data-action="usage" data-field="${field}" value="${escHtml(String(v ?? ''))}">
+    </label>`;
+}
+
 function renderExport() {
   return `
     <section class="step" aria-labelledby="s5">
       <div class="step-head">
         <span class="step-head__n">5</span>
-        <h2 class="step-head__title" id="s5">Take the prompt</h2>
-        <p class="step-head__lead">The whole session as a build order — drop it into any AI coding tool and cook.</p>
+        <h2 class="step-head__title" id="s5">Take the prompts</h2>
+        <p class="step-head__lead">Two exports: the build order for the AI that cooks, and a fit check that asks whether the free tiers will actually hold your numbers.</p>
       </div>
-      <div class="export-actions">
-        <button class="btn btn--primary" data-action="copy-prompt">Copy prompt</button>
-        <button class="btn btn--secondary" data-action="download-prompt">Download .md</button>
-        <button class="btn btn--ghost" data-action="share-link">Copy share link</button>
+      <div class="export-grid">
+        <div class="cost-card">
+          <h3 class="cost-card__title">Build order</h3>
+          <p class="cost-card__sub">The whole session as a build order, drop it into any AI coding tool and cook.</p>
+          <div class="export-actions">
+            <button class="btn btn--primary" data-action="copy-prompt">Copy prompt</button>
+            <button class="btn btn--secondary" data-action="download-prompt">Download .md</button>
+            <button class="btn btn--ghost" data-action="share-link">Copy share link</button>
+          </div>
+          <pre class="prompt-pre" id="prompt-preview">${escHtml(buildPrompt())}</pre>
+        </div>
+        <div class="cost-card">
+          <h3 class="cost-card__title">Will the free tiers hold?</h3>
+          <p class="cost-card__sub">Your expected usage plus every pick's recorded limits, as a research prompt: an agent verifies live pricing pages and names the first limit to break.</p>
+          <div class="usage-row">
+            ${usageField('Visitors / month', 'visitors', 'e.g. 2000')}
+            ${usageField('Active users', 'users', 'e.g. 50')}
+            ${usageField('Stored GB', 'storageGb', 'e.g. 1')}
+          </div>
+          <div class="export-actions">
+            <button class="btn btn--primary" data-action="copy-fit">Copy fit check</button>
+            <button class="btn btn--secondary" data-action="download-fit">Download .md</button>
+          </div>
+          <pre class="prompt-pre" id="fit-preview">${escHtml(buildFitPrompt())}</pre>
+        </div>
       </div>
-      <pre class="prompt-pre" id="prompt-preview">${escHtml(buildPrompt())}</pre>
     </section>`;
 }
 

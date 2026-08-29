@@ -9,9 +9,9 @@
 // Prices change monthly — the table is a snapshot, links included.
 
 export const AI_MODELS = {
-  'sonnet-5':     { name: 'Claude Sonnet 5',     provider: 'Anthropic', in: 2.00,  out: 10.00, note: 'Best value quality — intro price ends Aug 2026, then $3/$15', bestValue: true },
+  'sonnet-5':     { name: 'Claude Sonnet 5',     provider: 'Anthropic', in: 2.00,  out: 10.00, note: 'Best value quality: intro price ends Aug 2026, then $3/$15', bestValue: true },
   'opus-5':       { name: 'Claude Opus 5',       provider: 'Anthropic', in: 5.00,  out: 25.00, note: 'Top-tier coding model' },
-  'haiku-45':     { name: 'Claude Haiku 4.5',    provider: 'Anthropic', in: 1.00,  out: 5.00,  note: 'Fast/cheap — edits and boilerplate' },
+  'haiku-45':     { name: 'Claude Haiku 4.5',    provider: 'Anthropic', in: 1.00,  out: 5.00,  note: 'Fast/cheap: edits and boilerplate' },
   'gpt56-terra':  { name: 'GPT-5.6 Terra',       provider: 'OpenAI',    in: 2.50,  out: 15.00, note: 'Mid flagship split' },
   'gpt53-codex':  { name: 'GPT-5.3 Codex',       provider: 'OpenAI',    in: 1.75,  out: 14.00, note: 'Coding-tuned' },
   'gpt5-mini':    { name: 'GPT-5 mini',          provider: 'OpenAI',    in: 0.25,  out: 2.00,  note: 'Budget tier' },
@@ -55,7 +55,7 @@ export const SUBSCRIPTION_PATH = {
   S:  { plan: 'Claude Pro / Cursor Pro / ChatGPT Plus', usd: 20,  note: 'A focused weekend or two. Any $20 plan covers a small build.' },
   M:  { plan: 'Claude Pro / Cursor Pro',                usd: 20,  note: 'Fits a $20/mo plan if you are not reckless with rerolls.' },
   L:  { plan: 'Claude Max 5x / ChatGPT Pro',            usd: 100, note: 'One month of a $100 tier with iteration, debugging, refactors.' },
-  XL: { plan: 'Claude Max 5–20x',                       usd: 150, note: 'Budget 2–3 months of a $100–200 tier — marketplaces fight back.' },
+  XL: { plan: 'Claude Max 5–20x',                       usd: 150, note: 'Budget 2–3 months of a $100–200 tier: marketplaces fight back.' },
 };
 
 export const MODEL_PRICING_SOURCES = [
