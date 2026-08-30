@@ -4,6 +4,7 @@
 
 - Live: https://doorman.neorgon.com/
 - Part of the Neorgon tool suite (free, no signup, runs in your browser): https://neorgon.com/
+- Keywords: stack, architecture, free-tier, scaffolding
 
 ## More Neorgon tools
 
