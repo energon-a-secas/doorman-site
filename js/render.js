@@ -385,7 +385,7 @@ function renderChallenges() {
         <div>
           <ul class="gotcha-list">
             ${gotchas.map(g => `
-              <li class="gotcha-item">${icon('warn', 'ic--warn')} <strong>${escHtml(g.from)}</strong> — ${escHtml(g.text)}</li>`).join('')}
+              <li class="gotcha-item">${icon('warn', 'ic--warn')} <strong>${escHtml(g.from)}</strong>, ${escHtml(g.text)}</li>`).join('')}
           </ul>
         </div>
       </div>
