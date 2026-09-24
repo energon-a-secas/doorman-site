@@ -1,7 +1,6 @@
 // ── Entry point ──────────────────────────────────────────────
-// Doorman: Stack Cookbook — pick a recipe, see its probable stack,
-// swap ingredients (open-source ↔ managed), compare costs, export
-// the build prompt. Keep this file under 50 lines.
+// Original single-page cookbook: recipes, stacks, costs, builders, tradeoffs and prompts.
+// Keep this entry point under 50 lines.
 
 import { initState } from './state.js';
 import { renderApp } from './render.js';

@@ -15,6 +15,7 @@ function update() {
 }
 
 const actions = {
+  'dismiss-error'() { state.ui.error=''; renderApp(); },
   strategy(el) {
     const s = el.dataset.strategy;
     if (s === 'free') applyFreeTier();
@@ -62,7 +63,9 @@ const actions = {
     showToast(ok ? 'Share link copied' : 'Copy failed: grab the URL from the address bar');
   },
   preset(el) {
+    const tier=state.tier;
     applyPreset(el.dataset.preset);
+    state.tier=tier;
     state.ui.openCat = null;
     update();
     const p = PRESETS[el.dataset.preset];
@@ -89,24 +92,33 @@ const actions = {
 };
 
 export function bindEvents() {
-  $('app').addEventListener('click', (e) => {
-    const el = e.target.closest('[data-action]');
+  document.querySelector('.section-nav').addEventListener('click',event=>{
+    const button=event.target.closest('[data-jump]');if(!button) return;
+    const section=document.getElementById(button.dataset.jump);
+    section.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',block:'start'});
+    const heading=section.querySelector('h2');heading.tabIndex=-1;heading.focus({preventScroll:true});
+  });
+  $('app').addEventListener('click', async (e) => {
+    const el = e.target.closest('button[data-action]');
     if (!el) return;
     const fn = actions[el.dataset.action];
-    if (fn) fn(el);
+    if (fn) try { await fn(el); } catch(error) { state.ui.error=error.message;renderApp(); }
   });
-  $('app').addEventListener('change', (e) => {
-    const usage = e.target.closest('input[data-action="usage"]');
-    if (usage) {
-      state.usage[usage.dataset.field] = usage.value;
-      update();
-      return;
-    }
-    const el = e.target.closest('select[data-action="recipe-select"]');
-    if (!el) return;
-    applyRecipe(el.value);
-    state.ui.openCat = null;
-    state.ui.preset = null; // a manual recipe change ends the preset framing
+  // Keep inputs in place: a blur-triggered rerender must not swallow the copy click.
+  $('app').addEventListener('input',event=>{
+    const el=event.target;
+    if(el.dataset.action==='compare-draft') {state.ui.compareDraft=el.value;return;}
+    if(el.dataset.action!=='usage') return;
+    state.usage[el.dataset.field]=el.value;
+    save();writeHash();
+    document.getElementById('fit-preview').textContent=buildFitPrompt();
+    document.getElementById('prompt-preview').textContent=buildPrompt();
+  });
+  $('app').addEventListener('change',event=>{
+    const el=event.target.closest('select[data-action="recipe-select"]');if(!el) return;
+    const tier=state.tier;
+    applyRecipe(el.value);state.tier=tier;
+    state.ui.openCat=null;state.ui.preset=null;
     update();
   });
 }

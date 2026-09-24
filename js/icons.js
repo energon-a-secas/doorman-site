@@ -50,6 +50,6 @@ export function favicon(url) {
   if (!url) return '';
   try {
     const host = new URL(url).hostname;
-    return `<img class="favicon" src="https://www.google.com/s2/favicons?domain=${host}&sz=32" alt="" loading="lazy" referrerpolicy="no-referrer">`;
+    return `<img class="favicon" src="https://www.google.com/s2/favicons?domain=${host}&sz=32" width="20" height="20" alt="" loading="lazy" referrerpolicy="no-referrer">`;
   } catch { return ''; }
 }

@@ -1,175 +1,295 @@
-// ── Build-prompt export ──────────────────────────────────────
-// Generates the markdown that turns this session into a build order:
-// recipe, stack with every ingredient's free tier + gotcha, cost
-// expectations, known challenges, and constraints for the AI builder.
+import { recipeInsights, insightsBrief } from './insights.js';
+import { budgetText } from './budget.js';
+import { costEvidence, evidenceSummary } from './data-evidence.js';
+// Human-readable contracts, generated from the same complete candidates as the UI.
+import { accessLines } from './access.js';
+export { accessLines } from './access.js';
+import { TIERS } from './data-recipes.js';
+import { PRESETS } from './data-presets.js';
+import { state } from './state.js';
+import { totalsForConfig } from './costmodel.js';
+import { describePlan, stackItems, planWarnings } from './plan.js';
+import { fmtUsd } from './utils.js';
 
-import { CATEGORIES } from './data-services.js';
-import { RECIPES, FRONTENDS, TIERS } from './data-recipes.js';
-import { state, activeCategories, currentPick, bundlerFor } from './state.js';
-import { infraTotals, buildTokens, modelCosts, subscriptionPath, yearOneTotal, activeRules, activeExits } from './costmodel.js';
-import { fmtUsd, fmtTokens } from './utils.js';
-
-function stackLines() {
-  const lines = [];
-  for (const catKey of activeCategories()) {
-    const cat = CATEGORIES[catKey];
-    const pick = currentPick(catKey);
-    if (!pick) {
-      const b = bundlerFor(catKey);
-      lines.push(`- **${cat.label}:** bundled with ${b ? b.name : 'another pick'}. No extra service or cost.`);
-      continue;
-    }
-    if (pick.type === 'none') {
-      lines.push(`- **${cat.label}:** skip: ${pick.gotcha}`);
-      continue;
-    }
-    const bits = [`**${cat.label}:** ${pick.name}`];
-    const meta = [];
-    if (pick.free) meta.push(`free tier: ${pick.free}`);
-    meta.push(`then ${pick.entry}`);
-    if (pick.revshare) meta.push(`cut: ${pick.revshare}`);
-    if (pick.exit) meta.push(`exit: ${pick.exit}`);
-    bits.push(`(${meta.join(' · ')})`);
-    bits.push(`watch out: ${pick.gotcha}`);
-    lines.push('- ' + bits.join(' '));
-  }
-  return lines;
+const list = (items) => items.map((x) => `- ${x}`);
+export function buildPrompt(cfg = state, full = false) {
+  const p = describePlan(cfg),
+    totals = totalsForConfig(cfg);
+  const rows = stackItems(cfg);
+  return [
+    `# Build this iteration: ${p.name}`,
+    '',
+    `Objective: ${p.outcome}`,
+    `Concrete example: ${p.example}`,
+    `Reference: ${p.reference}. Recreate the agreed workflow, not every feature of the reference product.`,
+    ...(cfg.preset ? [`Scope caveat: ${PRESETS[cfg.preset].wontGet}`] : []),
+    `Implementation stage: ${p.stage}`,
+    '',
+    '## Included now',
+    ...list(p.included),
+    '',
+    '## Deferred',
+    ...list(p.deferred),
+    '',
+    '## Not needed for this scope',
+    ...list(p.notNeeded),
+    '',
+    '## Design',
+    `${p.design.label}: ${p.design.pattern}.`,
+    p.design.details,
+    'Preserve visible keyboard focus, readable contrast, reduced-motion preferences and usable narrow-screen controls.',
+    '',
+    '## Exact stack and capability ownership',
+    `Frontend: ${p.frontend.label}.`,
+    ...(rows.length
+      ? rows.map(
+          (r) =>
+            `- ${r.label}: ${r.name}.${r.option?.type === 'none' ? ' Do not provision a service for this capability.' : ''}`,
+        )
+      : ['- No external services. Browser-local state plus portable JSON exports.']),
+    '',
+    '## Benefits and downsides of this combination',
+    ...recipeInsights(cfg).providers.flatMap((r) => [
+      `- ${r.name}: ${r.benefit}`,
+      `  Downside: ${r.tradeoff}`,
+    ]),
+    '',
+    '## Repository context',
+    cfg.context ||
+      'Inspect the existing repository and its instructions first. Repository-specific details are not yet supplied.',
+    '',
+    '## Acceptance criteria',
+    ...list(p.acceptance),
+    '',
+    '## Implementation order',
+    ...p.steps.map((s, i) => `${i + 1}. ${s}`),
+    '',
+    '## Costs and assumptions',
+    `Recurring infrastructure scenario: ${fmtUsd(totals[cfg.tier])}/month (${TIERS[cfg.tier].label}).`,
+    `Annual infrastructure at the same scenario: ${fmtUsd(12 * totals[cfg.tier])}.`,
+    'These are editorial scenarios, not a usage forecast or a complete project quote. Excludes AI usage/subscriptions, human work, maintenance, taxes and payment processing fees. A custom domain is optional.',
+    'Verify provider limits and eligibility on the linked official pages before provisioning. Usage inputs below are research assumptions; they do not drive these totals.',
+    `Usage assumptions: ${usageSummary(cfg)}.`,
+    '',
+    '## Build and maintenance allowance',
+    budgetText(cfg),
+    '',
+    '## Price evidence',
+    evidenceSummary(cfg),
+    ...costEvidence(cfg)
+      .filter((r) => !r.bundledWith && r.status !== 'not-applicable')
+      .map(
+        (r) =>
+          `- ${r.category}: ${r.status}; checked ${r.checkedAt || 'not recorded'}. ${r.note} Source: ${r.source || 'missing'}`,
+      ),
+    '',
+    '## Access prerequisites',
+    ...accessLines(cfg),
+    '',
+    '## Constraints',
+    '- Implement this iteration only. Do not provision services for deferred capabilities.',
+    '- Keep agreed choices. If a verified incompatibility blocks them, report evidence and the smallest viable adjustment.',
+    '- Use a bundled provider for its assigned capability; do not introduce another vendor for the same job.',
+    '- Keep secret values out of browser code, prompts and share links. Refer to environment variables by name.',
+    '- Keep the app data exportable and verify the core flow with a keyboard.',
+    ...rows
+      .filter((r) => r.option?.type !== 'none' && r.option?.rule)
+      .map((r) => `- ${r.name}: ${r.option.rule}`),
+    ...planWarnings(cfg).map((w) => `- UNRESOLVED: ${w}`),
+    '',
+    '## Limitations and next iteration',
+    p.limitation,
+    `Advance only when: ${p.nextTrigger}`,
+    'Report implemented behavior, validation, unresolved assumptions and the next small change.',
+    ...(full
+      ? [
+          '',
+          insightsBrief(cfg),
+          '',
+          '## Provider details',
+          ...rows
+            .filter((r) => r.option?.type !== 'none' && r.option)
+            .flatMap((r) => [
+              `### ${r.name}`,
+              `Source: ${r.option.url || 'Not supplied'}`,
+              `Recorded limits: ${r.option.free || 'No free tier recorded'}`,
+              `Watch out: ${r.option.gotcha}`,
+              `Exit: ${r.option.exit || 'Unrated'}. ${r.option.exitNote || ''}`,
+              '',
+            ]),
+        ]
+      : []),
+    '',
+    '_Generated by Doorman: https://doorman.neorgon.com/_',
+  ].join('\n');
 }
-
-function exitLines() {
-  const exits = activeExits();
-  const hard = exits.filter(e => e.grade !== 'easy');
-  if (!hard.length) return ['Every pick here exits easily: this stack does not lock you in.'];
-  return hard.map(e => `- **${e.from}** (${e.grade}): ${e.note}`);
+export function usageSummary(cfg) {
+  const u = cfg.usage;
+  return `visitors/month ${u.visitors || 'unspecified'}, active users ${u.users || 'unspecified'}, stored GB ${u.storageGb || 'unspecified'}`;
 }
-
-export function buildPrompt() {
-  const recipe = RECIPES[state.recipe] || RECIPES.blank;
-  const fe = FRONTENDS[state.frontend];
-  const totals = infraTotals();
-  const tokens = buildTokens();
-  const models = modelCosts();
-  const sub = subscriptionPath();
-  const cheap = models[0];
-  const quality = models.find(m => m.bestValue) || models[Math.floor(models.length / 2)];
-
-  const tierRow = Object.keys(TIERS).map(k => `${TIERS[k].label} ${fmtUsd(totals[k])}/mo`).join(' · ');
-
-  const lines = [
-    `# Build a ${recipe.label}: stack + constraints (Doorman recipe)`,
+export function buildFitPrompt(cfg = state) {
+  return [
+    `# Verify the infrastructure scenario: ${describePlan(cfg).name}`,
     '',
-    `> ${recipe.blurb}`,
+    `Expected usage: ${usageSummary(cfg)}. Ask for missing workload, seat and transaction assumptions rather than inventing them.`,
     '',
-    '## Frontend approach',
+    ...stackItems(cfg)
+      .filter((r) => r.option?.type !== 'none' && r.option)
+      .map(
+        (r) =>
+          `- ${r.name}: ${r.option.free || 'No free tier recorded'}. Source: ${r.option.url || 'unspecified'}`,
+      ),
     '',
-    `**${fe.label}**: ${fe.blurb}`,
-    ...fe.pros.map(p => `- + ${p}`),
-    ...fe.cons.map(c => `- − ${c}`),
+    'Verify the current plan limits, commercial eligibility, seats, requests, egress, storage, transactions and overage behavior from official sources.',
+    'Do not assume visitor count equals requests, or that a budget alert is a spending cap. Include account-wide limits and existing projects.',
+    'Translate the stated workload into each provider’s units. State assumptions and identify the first limit to break.',
+    'For a local-only configuration, confirm that no external infrastructure is required.',
     '',
-    '## The stack (swaps already decided: do not relitigate)',
-    '',
-    ...stackLines(),
-    '',
-    '## Cost expectations',
-    '',
-    `- **Infra:** ${tierRow} (estimates: confirm on each pricing page; prices researched July 2026).`,
-    `- **AI build:** ~${fmtTokens(tokens)} tokens total → ~${fmtUsd(cheap.usd)} on ${cheap.name} (budget) or ~${fmtUsd(quality.usd)} on ${quality.name} (quality).`,
-    `- **Subscription path:** one month of ${sub.plan} (~$${sub.usd}/mo) likely covers it, ${sub.note}`,
-    `- **Year one, all-in:** ~${fmtUsd(yearOneTotal())} (12 months at Launched plus one ${quality.name} build).`,
-    '',
-    '## Known challenges (plan for these explicitly)',
-    '',
-    ...recipe.challenges.map((c, i) => `${i + 1}. **${c.title}**: ${c.note}`),
-    '',
-    '## What leaving costs (know the exits before moving in)',
-    '',
-    ...exitLines(),
-    '',
-    '## Constraints for the build',
-    '',
-    '- Start inside free tiers; call out exactly which limit gets hit first and when.',
-    '- If a bundled pick (BaaS) covers a category, use it: do not add a second service for the same job.',
-    '- Ship the smallest working version of the core loop first, then the secondary screens.',
-    '- Every secret goes in env vars; every third-party call degrades gracefully.',
-    '- No analytics or tracking beyond the chosen analytics pick.',
-    '- Keep the data exportable: one command that dumps everything the app owns.',
-    ...activeRules().map(r => `- [${r.from}] ${r.text}`),
-    '',
-    `_Generated by Doorman: doorman.neorgon.com_`,
-  ];
-  return lines.join('\n');
-}
-
-// ── Free-tier fit check ──────────────────────────────────────
-// The second export: not a build order but a research order. Lists the
-// stack's recorded free-tier limits plus the user's expected usage, and
-// asks the agent to verify current limits and find the first one to break.
-
-function usageLine(label, v, unit) {
-  const n = Number(v);
-  const shown = v !== '' && Number.isFinite(n) && n > 0
-    ? `${n.toLocaleString('en-US')} ${unit}`
-    : `[fill in: ${unit}]`;
-  return `- **${label}:** ${shown}`;
-}
-
-function fitStackLines() {
-  const lines = [];
-  for (const catKey of activeCategories()) {
-    const cat = CATEGORIES[catKey];
-    const pick = currentPick(catKey);
-    if (!pick) {
-      const b = bundlerFor(catKey);
-      lines.push(`- **${cat.label}:** bundled into ${b ? b.name : 'another pick'}; check the bundler's limits once, not per category.`);
-      continue;
-    }
-    if (pick.type === 'none') continue;
-    const free = !pick.free ? 'no free tier'
-      : pick.free.startsWith('No free tier') ? pick.free
-      : `free tier: ${pick.free}`;
-    const link = pick.url ? ` · ${pick.url}` : '';
-    lines.push(`- **${cat.label}:** ${pick.name} (${free})${link}`);
-  }
-  return lines;
-}
-
-export function buildFitPrompt() {
-  const recipe = RECIPES[state.recipe] || RECIPES.blank;
-  const u = state.usage;
-
-  const lines = [
-    `# Free-tier fit check: ${recipe.label} (Doorman)`,
-    '',
-    '> Question: will this stack stay at $0/mo at the usage below, and if not, which limit breaks first?',
-    '',
-    '## Expected usage (steady state, not launch-day spike)',
-    '',
-    usageLine('Visitors', u.visitors, 'visitors/month'),
-    usageLine('Active users', u.users, 'monthly active users'),
-    usageLine('Stored data', u.storageGb, 'GB total (files + database)'),
-    '',
-    'If a number above looks inconsistent with the app described, say so before calculating.',
-    '',
-    '## The stack to check',
-    '',
-    ...fitStackLines(),
-    '',
-    '## What to do',
-    '',
-    '1. Verify every free-tier limit on the linked pricing page. The limits quoted above were researched July 2026 and may have changed.',
-    '2. Translate the expected usage into each service\'s own metering unit (MAU, function calls, bandwidth, build minutes, emails/day, records, message fan-out). State the assumptions behind each conversion.',
-    '3. Flag the qualitative traps separately from the numbers: tiers that pause or sleep on inactivity, non-commercial-only clauses, card-required signups, and hard caps that stop service vs overages that bill automatically.',
-    '4. Give a per-service verdict (fits / tight / will bill), then one overall verdict naming the FIRST limit to break and at what multiple of the expected usage it breaks.',
-    '5. For anything that will bill, name the cheapest escape: that service\'s entry plan, or the swap this stack should make instead.',
-    '',
-    '## Output format',
-    '',
-    '| Service | Metered unit | Free limit | Projected usage | Headroom | Verdict |',
+    '| Service | Source and checked date | Meter | Limit | Expected usage | Verdict |',
     '|---|---|---|---|---|---|',
     '',
-    'Then a short verdict paragraph: the first limit to break, when, and what it costs to fix.',
+    'Report fits / needs information / will bill, then the smallest adjustment. Distinguish fixed charges, variable fees and optional domain cost.',
+  ].join('\n');
+}
+export function buildComparison(configs = [...state.candidates, state]) {
+  const escape = (s) => String(s).replaceAll('|', '\\|').replaceAll('\n', ' ');
+  const descriptions = configs.map(describePlan);
+  const row = (title, values) => `| ${title} | ${values.map(escape).join(' | ')} |`;
+  return [
+    '# Build option comparison',
     '',
-    `_Generated by Doorman: doorman.neorgon.com_`,
-  ];
-  return lines.join('\n');
+    row(
+      'Option',
+      descriptions.map((p) => p.name),
+    ),
+    `|---|${configs.map(() => '---|').join('')}`,
+    row(
+      'Outcome',
+      descriptions.map((p) => p.outcome),
+    ),
+    row(
+      'Stage',
+      descriptions.map((p) => p.stage),
+    ),
+    row(
+      'Included',
+      descriptions.map((p) => p.included.join('; ')),
+    ),
+    row(
+      'Deferred',
+      descriptions.map((p) => p.deferred.join('; ')),
+    ),
+    row(
+      'Design',
+      descriptions.map((p) => p.design.label),
+    ),
+    row(
+      'Stack',
+      configs.map((c, i) =>
+        [descriptions[i].frontend.label, ...stackItems(c).map((r) => `${r.label}: ${r.name}`)].join(
+          '; ',
+        ),
+      ),
+    ),
+    row(
+      `Infrastructure / month (${TIERS[state.tier].label} for every option)`,
+      configs.map((c) => fmtUsd(totalsForConfig(c)[state.tier])),
+    ),
+    row(
+      'Example',
+      descriptions.map((p) => p.example),
+    ),
+    row(
+      'Benefits',
+      configs.map(
+        (c) =>
+          recipeInsights(c)
+            .providers.map((r) => `${r.name}: ${r.benefit}`)
+            .join('; ') || 'No external services',
+      ),
+    ),
+    row(
+      'Service downsides',
+      configs.map(
+        (c) =>
+          recipeInsights(c)
+            .providers.map((r) => `${r.name}: ${r.tradeoff}`)
+            .join('; ') || 'Local persistence and file backups',
+      ),
+    ),
+    row('Price confidence', configs.map(evidenceSummary)),
+    row('Build allowance', configs.map(budgetText)),
+    row(
+      'Work',
+      descriptions.map((p) => p.effort),
+    ),
+    row(
+      'Access',
+      configs.map((c) => accessLines(c).join('; ')),
+    ),
+    row(
+      'Limitations',
+      descriptions.map((p) => p.limitation),
+    ),
+    row(
+      'Upgrade trigger',
+      descriptions.map((p) => p.nextTrigger),
+    ),
+    '',
+    'All costs use the same scenario and current catalogue data. They exclude AI usage, labor, maintenance and transaction fees.',
+  ].join('\n');
+}
+export function buildNextPrompt(baseline, current = state) {
+  const before = describePlan(baseline),
+    after = describePlan(current);
+  const oldRows = stackItems(baseline),
+    newRows = stackItems(current);
+  return [
+    `# Next iteration: ${before.name} → ${after.name}`,
+    '',
+    'Treat the baseline as implemented only after checking the repository. Preserve its working behavior.',
+    `Baseline outcome: ${before.outcome}`,
+    `Target outcome: ${after.outcome}`,
+    '',
+    '## Scope changes',
+    ...list(after.included.filter((x) => !before.included.includes(x)).map((x) => `Add: ${x}`)),
+    ...list(
+      before.included
+        .filter((x) => !after.included.includes(x))
+        .map((x) => `Review removal or replacement: ${x}`),
+    ),
+    '',
+    '## Stack changes',
+    ...newRows
+      .filter((r) => !oldRows.some((o) => o.key === r.key && o.name === r.name))
+      .map((r) => `- ${r.label}: ${r.name}`),
+    ...oldRows
+      .filter((r) => !newRows.some((n) => n.key === r.key))
+      .map((r) => `- Retire ${r.label}: ${r.name}; preserve/export its data before removal.`),
+    `- Frontend: ${before.frontend.label} → ${after.frontend.label}`,
+    `- Design: ${before.design.label} → ${after.design.label}`,
+    '',
+    '## Target design and repository',
+    `${after.design.pattern}. ${after.design.details}`,
+    current.context || 'Inspect repository instructions first.',
+    '',
+    '## Target acceptance criteria',
+    ...list(after.acceptance),
+    '',
+    '## Access for the target',
+    ...accessLines(current),
+    '',
+    '## Target costs and assumptions',
+    `${fmtUsd(totalsForConfig(current)[current.tier])}/month infrastructure (${TIERS[current.tier].label}); usage: ${usageSummary(current)}.`,
+    evidenceSummary(current),
+    budgetText(current),
+    '',
+    '## Still deferred',
+    ...list(after.deferred),
+    '',
+    ...planWarnings(current).map((w) => `UNRESOLVED: ${w}`),
+    'Keep secret values out of prompts and client code; follow the access guide for variable placement.',
+    'Implement only this delta. Report migrations, regression checks and unresolved assumptions. Never discard existing data to fit the target.',
+    `Next trigger: ${after.nextTrigger}`,
+  ].join('\n');
 }

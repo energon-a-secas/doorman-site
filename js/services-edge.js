@@ -114,12 +114,12 @@ export const domains = {
   blurb: 'The address. In a free stack this is usually the only real bill: ~$10/yr, and a DNS API makes deploys scriptable.',
   options: {
     platformsub: {
-      name: 'Platform subdomain (*.github.io / *.pages.dev)', type: 'freemium', strategy: 'managed', freeTier: true,
-      free: 'Included with the host: HTTPS, no renewal, no bill, forever',
+      name: 'No custom domain (use the host address)', type: 'none', strategy: null,
+      free: 'Use the address supplied by the selected host',
       entry: '$0', url: 'https://pages.github.com/',
-      gotcha: 'Moving to a real domain later resets SEO and breaks every link ever shared. Decide before launch, not after; the subdomain names the platform, not you.',
+      gotcha: 'Changing addresses later may require redirects and updating shared links. A custom domain is optional.',
       cost: { hobby: 0, launched: 0, scaling: 0 },
-      exit: 'sticky', exitNote: 'Leaving means the rename tax: every shared link breaks. Move early if you will move at all.',
+      exit: 'sticky', exitNote: 'The provider controls the hostname; plan redirects or replacement links if moving.',
     },
     porkbun: {
       name: 'Porkbun', type: 'paid', strategy: 'managed', recommended: true,

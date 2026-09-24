@@ -77,12 +77,12 @@ export const payments = {
     stripe: {
       name: 'Stripe', type: 'revshare', strategy: 'managed', recommended: true, freeTier: true,
       free: 'No monthly fee',
-      entry: '2.9% + $0.30 per charge', url: 'https://stripe.com/pricing',
-      gotcha: 'Cheapest cut, but YOU are the merchant of record, global sales tax/VAT registration is your hobby now.',
+      entry: 'Transaction fees depend on country and payment method', url: 'https://stripe.com/pricing',
+      gotcha: 'Standard payments have variable fees; subscription billing and other products can add charges. Verify availability and responsibilities for your business location.',
       cost: { hobby: 0, launched: 0, scaling: 0 },
       exit: 'sticky', exitNote: 'Card-vault migration is a support-coordinated project on both ends: weeks, not days.',
-      rule: 'You are the merchant of record: wire tax handling (or a MoR layer) before the first real sale.',
-      revshare: '2.9% + 30¢',
+      rule: 'Verify account eligibility, transaction fees and billing requirements before accepting live payments.',
+      revshare: 'Variable transaction and billing fees',
     },
     paddle: {
       name: 'Paddle', type: 'revshare', strategy: 'managed',

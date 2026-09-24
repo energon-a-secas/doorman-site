@@ -1,6 +1,5 @@
 // ── Copy-a-real-site presets ─────────────────────────────────
-// The cookbook's party trick: name a site everyone knows, land on
-// the recipe it probably runs on, with picks tweaked to match.
+// Familiar workflow references, not claims about the original companies' stacks.
 //
 // Preset shape:
 //   label    the product name people recognise
@@ -12,39 +11,66 @@
 //            Shown in the glance panel until the next recipe change.
 
 export const PRESETS = {
+  pathfinder: {
+    objective: 'Map a project as connected decisions and export a useful build brief.',
+    label: 'Pathfinder',
+    recipe: 'pathfinder',
+    wontGet: 'A planning canvas first. Live co-editing and private cloud ownership are separate iterations.',
+  },
   airbnb: {
-    label: 'Airbnb', recipe: 'marketplace',
-    wontGet: 'The software is the cheap half. Supply, trust and insurance are the moat, and they took a decade.',
+    objective: 'Let guests find an available listing and request a booking from its owner.',
+    label: 'Airbnb',
+    recipe: 'marketplace',
+    wontGet:
+      'The software is the cheap half. Supply, trust and insurance are the moat, and they took a decade.',
   },
   substack: {
-    label: 'Substack', recipe: 'content',
+    objective: 'Publish and browse a focused collection of articles.',
+    label: 'Substack',
+    recipe: 'content',
     picks: { email: 'brevo', cms: 'decap' },
-    wontGet: 'Deliverability reputation and the recommendation network are the product, not the editor. Paid posts also mean adding the payments ingredient.',
+    wontGet:
+      'Deliverability reputation and the recommendation network are the product, not the editor. Paid posts also mean adding the payments ingredient.',
   },
   discord: {
-    label: 'Discord', recipe: 'chat',
+    objective: 'Let a small group exchange messages in named channels.',
+    label: 'Discord',
+    recipe: 'chat',
     wontGet: 'Voice infrastructure and moderation tooling at scale are each their own company.',
   },
   notion: {
-    label: 'Notion', recipe: 'saas',
+    objective: 'Create, edit and organize simple text notes in a small workspace.',
+    label: 'Notion',
+    recipe: 'saas',
     frontend: 'framework',
-    wontGet: 'The block editor is a multi-year engineering project. The workspace shell around it is the easy 10%.',
+    wontGet:
+      'Start with simple notes. Block types, relational databases, permissions and live collaboration require separate scope.',
   },
   linktree: {
-    label: 'Linktree', recipe: 'staticspa',
-    wontGet: 'Nothing. This one you can actually finish by Friday.',
+    objective: 'Publish a readable profile with a curated list of links.',
+    label: 'Linktree',
+    recipe: 'staticspa',
+    wontGet:
+      'A static profile is a small scope. Visitor analytics, account editing and custom domains are separate choices.',
   },
   producthunt: {
-    label: 'Product Hunt', recipe: 'social',
-    wontGet: 'The community is the product; the feed is a weekend. Cold-starting the crowd is the real build.',
+    objective: 'Submit, discover and discuss a small collection of new products.',
+    label: 'Product Hunt',
+    recipe: 'social',
+    wontGet:
+      'A submission feed does not supply an audience. Moderation and community operations need separate planning.',
   },
   gumroad: {
-    label: 'Gumroad', recipe: 'ecommerce',
+    objective: 'List a digital product, accept payment and provide its download.',
+    label: 'Gumroad',
+    recipe: 'ecommerce',
     picks: { payments: 'lemonsqueezy' },
     wontGet: 'The checkout is easy. Fraud ops, chargebacks and payout edge cases are the decade of work.',
   },
   strava: {
-    label: 'Strava', recipe: 'mobile',
+    objective: 'Record activities and browse a personal activity history.',
+    label: 'Strava',
+    recipe: 'mobile',
     wontGet: 'GPS processing, segments and the social graph outweigh the app: the backend is the product.',
   },
 };

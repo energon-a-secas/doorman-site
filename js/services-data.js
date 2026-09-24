@@ -57,7 +57,7 @@ export const database = {
     },
     convex: {
       name: 'Convex', type: 'freemium', strategy: 'managed', recommended: true, freeTier: true,
-      free: '1M function calls/mo, 1 GB DB, 1 GB files, DB + backend functions + realtime + cron in one',
+      free: '1M function calls/mo, 0.5 GB DB, 1 GB files, DB + backend functions + realtime + cron in one',
       entry: '$25/dev/mo Professional', url: 'https://convex.dev/pricing',
       gotcha: 'Per-seat pricing: a 5-person team pays $125/mo regardless of traffic. Functions are the only runtime.',
       bundles: ['realtime', 'queue', 'storage'],
@@ -193,6 +193,11 @@ export const aiApi = {
   icon: 'cpu',
   blurb: 'The model behind the feature. Usage-based, your COGS lives here.',
   options: {
+    none: {
+      name: 'No hosted AI API', type: 'none', strategy: null,
+      free: '', entry: '$0', url: '', gotcha: 'Use deterministic behavior or define a local-model implementation separately; do not promise hosted AI features.',
+      cost: { hobby: 0, launched: 0, scaling: 0 },
+    },
     anthropic: {
       name: 'Anthropic (Claude)', type: 'paid', strategy: 'managed', recommended: true,
       free: 'No free tier: $5 credit gets you started',

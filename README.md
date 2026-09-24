@@ -1,157 +1,48 @@
-<div align="center">
-
 # Doorman
 
-Every site you use is a recipe. Pick one, see its probable stack, swap the ingredients for open-source or managed alternatives, price the copy across scale tiers, then take the prompt and cook.
+A stack cookbook for copying useful product workflows. Pick a recipe, inspect the services and their brands, swap ingredients, compare prices, and copy the build prompt.
 
-[![Live][badge-site]][url-site]
-[![HTML5][badge-html]][url-html]
-[![CSS3][badge-css]][url-css]
-[![JavaScript][badge-js]][url-js]
-[![Claude Code][badge-claude]][url-claude]
-[![License][badge-license]](LICENSE)
+[Live site](https://doorman.neorgon.com/) · [UI notes](DESIGN.md)
 
-[badge-site]:    https://img.shields.io/badge/live_site-c2904a?style=for-the-badge&logo=googlechrome&logoColor=white
-[badge-html]:    https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white
-[badge-css]:     https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white
-[badge-js]:      https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
-[badge-claude]:  https://img.shields.io/badge/Claude_Code-CC785C?style=for-the-badge&logo=anthropic&logoColor=white
-[badge-license]: https://img.shields.io/badge/license-MIT-404040?style=for-the-badge
+## The cookbook
 
-[url-site]:   https://doorman.neorgon.com/
-[url-html]:   #
-[url-css]:    #
-[url-js]:     #
-[url-claude]: https://claude.ai/code
+The original single-page design is the baseline. Six sections stay together:
 
-</div>
+1. **Pick a recipe:** eighteen combinations and nine familiar-product references, with a compact summary.
+2. **The stack:** branded service rows expand into open-source and managed alternatives, with free limits, paid entry, benefits, gotchas and exit notes. Choose a frontend and its tradeoffs.
+3. **What it costs:** Hobby, Launched and Scaling prices in one table. Pin a stack and compare subsequent changes, or load a shared baseline.
+4. **The builder:** twelve model-price rows alongside five coding tools and their payment details.
+5. **The hard parts:** recipe challenges and selected-provider caveats.
+6. **Take the prompts:** copy or download a build brief and a usage-fit research prompt. Credential setup links to [Échéance](https://echeance.neorgon.com/#tutorials).
 
----
+The section navigation scrolls within this page. There is no separate planner, catalogue tab or persistent summary sidebar. Mobile layouts keep provider prices visible and place wide tables in keyboard-accessible scroll regions.
 
-Doorman is a **stack cookbook**. You pick an app archetype, SaaS dashboard, marketplace, docs chatbot, an Airtable base with Interfaces on top, and it shows the stack that archetype probably runs on: which of the 15 service categories it actually needs, a concrete default pick for each, the free tier and the gotcha of every alternative, what the whole thing costs per month at three scale tiers, what it would cost to have an AI build it once, and the four hard parts the landing page never mentions.
+## Prices and assumptions
 
-The name is the thesis. The **doorman fallacy** (Rory Sutherland): firing the doorman looks efficient because you only price what you see. Doorman applies that to a stack. The ingredient list is the part everyone copies, and the gotchas underneath each one (Firebase's uncapped Blaze bill, Ably's 1-publish-to-100-subscribers fan-out, Airtable's 5 requests/sec) are the part that decides whether the copy survives. The doorman knows what's in the building.
+Infrastructure amounts are editorial scenarios, not workload quotes. Prices exclude labor, AI use, taxes and variable payment fees. Annual infrastructure uses twelve months of the selected scenario. Provider sources and review labels remain available in the alternatives.
 
-**Everything stays on your device. No backend, no accounts, no network calls**. The only outbound requests are favicons for the service logos.
+The original AI cost comparison uses recipe-size and frontend token assumptions, explicitly labeled **illustrative**. It does not promise a complete build for that price. Model rows show input/output rates, scenario cost, sources and review notes. Subscriptions have separate usage limits.
 
----
+## Run and check
 
-## What it does
-
-Six steps, one page:
-
-1. **Pick a recipe**: 16 archetypes plus a blank canvas, grouped into **product stacks** and an **almost-free** shelf for hobby and community builds whose whole bill is a domain, or nothing. A preset row copies a site everyone knows (Airbnb, Substack, Discord, Notion, Linktree, Product Hunt, Gumroad, Strava) straight onto the recipe it probably runs on, with an honest line on what the copy will not buy you. The glance panel adds the headline number: **year one, all-in** (12 months at Launched plus one AI build).
-2. **The stack**: tap any ingredient to open its alternatives, split into **open source / self-host** and **managed / pay-to-win**, each with its real free-tier limits, entry price, a link to the live pricing page, the one thing that bites people, and an **exit rating** (easy / sticky / rewrite): what leaving costs, next to what running costs. Three quick-swaps flip the whole stack: **Free tier** (the editorial $0-at-hobby pick per category, viewed at Hobby, keeping bundles bundled because fewest vendors is the point), **All open-source** and **All managed**. **BaaS picks absorb categories**, choose Supabase and auth, storage and realtime fold into it as one bill; choose Airtable and storage, CMS and auth fold in, because a seat *is* the login.
-3. **What it costs**: a per-ingredient table at **Hobby / Launched / Scaling**, with the free-tier, all-OSS and all-managed totals for the same recipe shown side by side. Next to it, **compare two stacks**: pin the current one (or paste a share link as the baseline), keep tweaking, and a per-ingredient diff shows the monthly delta and the build-cost delta live.
-4. **The builder**: the one-time **AI build cost** across 12 coding models (prices verified on vendor pages August 2026, "best value" flagged), the flat-subscription path for the current recipe size, and the agent tools that actually run the build (Claude Code, Codex CLI, Gemini CLI, Cursor, aider), each with how it is paid and the gotcha a hobbyist finds out too late. The table also says why sticker prices are not cross-vendor comparable: the newest Claudes tokenize ~30% more tokens for the same text.
-5. **The hard parts**: the recipe's four challenges, next to the gotcha of every ingredient you actually picked.
-6. **Take the prompts**: two exports. The **build order**: the frontend decision with its trade-offs, every ingredient with its free tier, trap and exit grade, the cost expectations including year one, the challenges, an exit map of the sticky picks, and constraints that are partly **derived from the picks themselves** (choose GitHub Pages and the prompt orders "no secrets in the bundle"; choose Firebase and it orders a Blaze budget cap). And the **free-tier fit check**: type your expected visitors, active users and stored GB, and get a research prompt that lists every pick's recorded limits and asks an agent to verify them on the live pricing pages, convert your usage into each service's own metering unit, and name the first limit to break. Copy, download, or share the URL.
-
-**Frontend: pick your compromise** sits inside step 2 as four cards, because it is the axis that moves the build estimate most: pure HTML/CSS/JS (×0.7), Vanilla + Tailwind (×1.0), a framework (×1.5), or a **no-code UI** (×0.25) where the tool holding your data draws the screens and there is nothing to generate at all.
-
----
-
-## The recipes
-
-| Recipe | Size | The point of it |
-|---|---|---|
-| SaaS Dashboard | M | Login, a data model, a bill. Auth is a subscription with a meter on your user table. |
-| Social / Community App | L | Cheap to start, brutal to scale. The feed is a data pipeline and moderation arrives uninvited. |
-| E-commerce Store | L | Money touches everything; compliance picks your processor. |
-| Blog / Content Site | S | The CMS decision is forever. |
-| Realtime Chat | M | Fan-out billing is the trap. |
-| Marketplace | XL | The boss fight: you are a payments company with a cold-start problem. |
-| Mobile App Backend | M | No frontend. Users run old app versions for months. |
-| AI Wrapper App | M | Your COGS is someone else's pricing page. |
-| **Internal Tool / Back Office** | M | Staff-only, no payments. The MAU meter runs *backwards*, 40 employees are free, SSO is what costs. |
-| **Support / Docs Chatbot** | M | Retrieval is the product; the model is a commodity. No paywall means no natural spend cap. |
-| **Airtable Base + Interfaces** | S | The base is the backend *and* the frontend. Priced by headcount; no git means no staging and no revert. |
-| **Airtable + App Backend (glue)** | M | Airtable for editors, Convex for the app, a Cloudflare Worker between, Netlify out front, three runtimes competing to hold one business rule. |
-| **Static SPA on GitHub Pages** | S | $0 at every tier. "Privately shared" is not a Pages feature. |
-| **Free-Stack App (Pages + Convex)** | S | Static frontend on GitHub Pages, Convex free tier as the real backend. The domain is the only bill, so make its DNS scriptable. |
-| **Hobby Community Site** | S | A club at double-digit members. Free tiers are not the constraint; your attention is, so plan the handover. |
-| **Airtable + Static Snapshot** | S | The team edits in Airtable; visitors read a JSON snapshot a scheduled Action commits to the repo. The 5 req/s cap stops mattering, and the snapshot is your backup and your exit. |
-| Blank Canvas | M | All 15 categories, no defaults. Justify each one. |
-
----
-
-## Usage
-
-No install, no build step.
-
-```bash
-make serve
-# open http://localhost:8849
+```sh
+make serve  # http://localhost:8849
+make test
+python3 tests/browser_smoke.py
 ```
 
-Or `python3 -m http.server 8849` from this directory. ES modules require an HTTP server, not `file://`.
+The app uses browser ES modules with no build step. Serve it over HTTP. Browser checks need Python Playwright and Chromium; set `AXE_SCRIPT` to a local axe-core file for accessibility checks. Output defaults to `/tmp/doorman-ui-reset`.
 
----
+## Implementation
 
-## The model
+- `render.js`, `events.js`, `icons.js`, `css/style.css`: the original cookbook layout, brand icons and interactions.
+- `data-recipes.js`, `data-presets.js`, `services-*.js`, `data-models.js`: recipes, tools and prices.
+- `config.js`, `state.js`, `costmodel.js`: validated selections, bundling, persistence and consistent strategy arithmetic.
+- `build-estimates.js`: explicitly illustrative token scenarios used by the original-style builder table.
+- `prompt.js`, `plan.js`, `insights.js`, `access.js`: concrete examples, tradeoffs and copyable references.
 
-Two independent numbers, both deterministic arithmetic. No LLM anywhere in the app.
+Configuration compatibility helpers retain earlier saved plans; they do not add planner screens. Deliberate omissions survive provider strategies, and recipe defaults may intentionally use separate services even when a backend offers bundles.
 
-**Run it.** Every option carries an editorial `{ hobby, launched, scaling }` monthly estimate; the tiers total them. A category absorbed by a BaaS pick reports `$0` with a pointer to its bundler, so bundling shows up as the saving it is instead of vanishing from the table.
+Plans use `localStorage['doorman-cookbook-v1']` and `#c=` share URLs. Share URLs include configuration and user-authored context; never include credentials. Shared UI assets and brand favicons may load remotely. The app does not send plans to an AI service.
 
-**Build it once.**
-
-```
-buildTokens = SIZE_TOKENS[recipe.size] × FRONTENDS[frontend].tokenFactor
-buildCost   = buildTokens × blendedRate(model)      // 3:1 input:output
-```
-
-| Recipe size | Tokens | | Frontend | Factor |
-|---|---|---|---|---|
-| S: a few pages, one data model | 1.5M | | No-code UI | ×0.25 |
-| M: real CRUD + auth + one integration | 6M | | Pure HTML/CSS/JS | ×0.7 |
-| L: multiple roles or a second hard subsystem | 15M | | Vanilla + Tailwind | ×1.0 |
-| XL: marketplace-class | 35M | | Framework | ×1.5 |
-
-That is why the same Airtable recipe reads 0.38M tokens as a no-code build and 2.25M as a framework build. Prices are a snapshot with every source linked: **infra researched July 2026, AI model prices verified on vendor pages August 2026** (the Kimi and Qwen rows are OpenRouter rates, because neither vendor publishes a reachable list price). The app says so in its own footer, and so does the exported prompt.
-
----
-
-## Architecture
-
-Zero-build ES modules, ~2.6k lines. Data is separated from behaviour so a price change is a one-line edit in one file.
-
-```
-doorman-site/
-├── index.html               # App shell, SEO head, JSON-LD, the cookbook framing
-├── css/style.css            # Neorgon dark theme + brass accent (#c2904a)
-├── js/
-│   ├── app.js               # Entry point — initState, render, wire events
-│   ├── state.js             # Recipe + picks + frontend + tier; bundle rules, localStorage, hash sharing
-│   ├── data-services.js     # Aggregates the 14 categories; the BUNDLED sentinel
-│   ├── services-hosting.js  # hosting, queue
-│   ├── services-data.js     # database, realtime, aiApi
-│   ├── services-edge.js     # storage, cdn
-│   ├── services-identity.js # auth, payments
-│   ├── services-ops.js      # email, search, analytics, monitoring, cms
-│   ├── data-recipes.js      # 14 recipes, 4 frontend approaches, 3 scale tiers
-│   ├── data-models.js       # 11 coding models, size→token table, subscription path
-│   ├── costmodel.js         # Infra rows/totals, strategy totals, build tokens, model costs
-│   ├── prompt.js            # The exportable markdown build order
-│   ├── render.js            # Full re-render of all five steps
-│   ├── events.js            # One delegated click + change listener on #app; every mutation re-renders
-│   ├── icons.js             # Inline stroke SVGs — no emoji in the UI, ever
-│   └── utils.js             # escHtml, fmtUsd, fmtTokens, toast, download
-├── Makefile                 # make serve (port 8849)
-├── robots.txt
-├── sitemap.xml
-└── CNAME                    # doorman.neorgon.com
-```
-
-**84 service options across 14 categories.** Adding one is a single object in the right `services-*.js`; two things about the file order are load-bearing, and both are documented at the top of `data-recipes.js`:
-
-- `applyStrategy('oss')` takes the **first** option whose `strategy` is `'oss'` in a category, so insertion order decides what "All open-source" lands on.
-- `setPick` stomps every category a `bundles` option claims. Recipe defaults bypass `setPick` and are assigned directly, which is how a recipe can deliberately keep R2 while Supabase would otherwise absorb storage.
-
-State autosaves to `localStorage` under `doorman-cookbook-v1` and encodes into the URL hash as `#c=…`. Boot order: hash → localStorage → the SaaS recipe.
-
-<div align="center">
-
-Part of [Neorgon](https://neorgon.com/)
-
-</div>
+Vendored `neorgon-*` files are maintained by the shared Neorgon kit.

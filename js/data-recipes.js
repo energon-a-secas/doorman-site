@@ -10,61 +10,52 @@
 
 /** Scale tiers for infra cost display. */
 export const TIERS = {
-  hobby:    { label: 'Hobby',    note: 'Side project: free tiers should carry you.' },
-  launched: { label: 'Launched', note: 'Real users: entry paid plans, no free-tier pauses.' },
-  scaling:  { label: 'Scaling',  note: 'Growth: ~10× launched traffic, bills get real.' },
+  hobby:    { label: 'Hobby',    note: 'Free-tier scenario, subject to each provider’s limits. Not calculated from the research inputs.' },
+  launched: { label: 'Launched', note: 'Paid-plan planning scenario. Workload and seats still need verification.' },
+  scaling:  { label: 'Scaling',  note: 'Higher-usage placeholder, not a measured traffic forecast.' },
 };
 
-/**
- * Frontend approach — the compromise axis. tokenFactor scales the
- * AI build estimate: frameworks cost more tokens to generate but
- * less pain to grow.
- */
+// Concrete frontend choices. Effort depends on the workflow and existing code.
 export const FRONTENDS = {
-  vanilla: {
-    label: 'Pure HTML/CSS/JS',
-    chip: 'No build step',
-    tokenFactor: 0.7,
-    blurb: 'Open an editor, ship a file. The Neorgon way.',
-    pros: ['Hosts free anywhere (GitHub Pages, CF Pages)', 'Cheapest to generate with AI', 'Nothing to upgrade, ever'],
-    cons: ['State + DOM get painful past ~1k lines', 'No component reuse: copy/paste creeps in'],
-  },
-  tailwind: {
-    label: 'Vanilla + Tailwind',
-    chip: 'Utility CSS',
-    tokenFactor: 1.0,
-    blurb: 'Same files, faster styling. AI writes Tailwind fluently.',
-    pros: ['Styling speed without a framework', 'Still hosts anywhere static', 'AI models know Tailwind cold'],
-    cons: ['CDN play-build is dev-only: use the CLI for prod', 'Class soup without discipline'],
-  },
-  framework: {
-    label: 'Framework (Next/SvelteKit/Vue)',
-    chip: 'Full structure',
-    tokenFactor: 1.5,
-    blurb: 'Components, routing, ecosystem. The default if it will grow.',
-    pros: ['Component model + routing built in', 'Ecosystem for every problem', 'SSR/SEO options when you need them'],
-    cons: ['Build step + Node hosting for SSR', '~1.5× the AI tokens to generate', 'Upgrade treadmill never stops'],
-  },
-  nocode: {
-    label: 'No-code UI (Airtable Interfaces / Softr)',
-    chip: 'No code at all',
-    tokenFactor: 0.25,
-    blurb: 'The tool that holds your data also draws the screens. Nothing to generate.',
-    pros: ['Live the afternoon you start: no repo, no deploy', 'Non-developers can edit the app itself', 'Tokens go to formulas and automations, not UI'],
-    cons: ['No git: no diff, no staging, no rollback', 'Priced per editor: the app gets pricier as the team grows, not as traffic does', 'The ceiling arrives without warning, and the rewrite starts from zero'],
-  },
+  vanilla: { label: 'Pure HTML/CSS/JS', chip: 'No build step',
+    blurb: 'Native browser modules and direct control over markup and behavior.',
+    pros: ['Small dependency surface', 'Portable static output'],
+    cons: ['State and reusable UI boundaries need deliberate structure'] },
+  tailwind: { label: 'Vanilla + Tailwind', chip: 'Utility CSS',
+    blurb: 'Browser modules with utility CSS compiled for deployment.',
+    pros: ['Shared styling conventions', 'Portable static output'],
+    cons: ['CSS compilation step', 'Reusable markup still needs structure'] },
+  framework: { label: 'React + Vite', chip: 'Components',
+    blurb: 'React components with Vite development and production builds. Routing is a separate choice.',
+    pros: ['Reusable component model', 'Established UI libraries'],
+    cons: ['Build tooling and dependency maintenance', 'Server rendering is not included in this selection'] },
+  nocode: { label: 'Airtable Interfaces', chip: 'Hosted interface',
+    blurb: 'Configure an interface over an Airtable base. Suitable for workflows supported by the platform.',
+    pros: ['Hosted editor and interface', 'Non-developers can configure supported workflows'],
+    cons: ['Permissions and cost depend on the plan', 'Custom interactions and portability have platform limits'] },
 };
 
 /**
- * Recipes. size drives the AI-build token estimate (see data-models.js):
+ * Legacy catalogue recipes. size is an editorial complexity label:
  *   S  — a few pages, one data model
  *   M  — real CRUD + auth + one integration
  *   L  — multiple roles or a second hard subsystem
  *   XL — marketplace-class: two-sided, payments + search + ops
  * budget: true groups the recipe under "Almost free" in the picker:
- * the archetypes whose whole bill is a domain (or nothing).
+ * legacy low-cost starting points; verify every selected provider.
  */
 export const RECIPES = {
+  pathfinder: {
+    label: 'Planning canvas (Pathfinder)', icon: 'gauge', size: 'M', budget: true,
+    blurb: 'Map a project, connect its decisions and export an actionable AI brief.',
+    categories: ['hosting', 'database', 'auth'],
+    defaults: { hosting: 'cfpages', database: 'supabase', auth: 'bundled' },
+    challenges: [
+      { title: 'The document is the contract', note: 'Keep nodes and connections portable across local save, sharing, cloud storage and AI export.' },
+      { title: 'Canvas access includes the keyboard', note: 'Offer discoverable node navigation and editing, not only drag gestures.' },
+      { title: 'Sharing does not require simultaneous editing', note: 'A read-only copy with importable feedback can solve review before a backend is justified.' },
+    ],
+  },
   saas: {
     label: 'SaaS Dashboard', icon: 'gauge', size: 'M',
     blurb: 'Login, a data model, a settings page, a bill. The B2B classic.',

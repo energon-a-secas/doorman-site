@@ -20,3 +20,7 @@ serve:
 .PHONY: kill
 kill:
 	@lsof -ti :$(PORT) | xargs kill 2>/dev/null && echo "Stopped server on port $(PORT)" || echo "No server running on port $(PORT)"
+
+.PHONY: test
+test:
+	@node --test tests/*.test.mjs

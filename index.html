@@ -87,14 +87,17 @@
       <div class="intro">
         <p class="intro__hook">Every site you use is a recipe.</p>
         <p class="intro__body">Behind each one: a database, an auth gate, a file bucket, a CDN. Each with an open-source twin and a managed shortcut. The doorman knows what's in the building.</p>
-        <p class="intro__cta">Pick a recipe, swap the ingredients, price the copy, then take the prompt and cook. On a hobby budget? The Almost-free recipes and the Free-tier swap keep the whole bill at the price of a domain.</p>
+        <p class="intro__cta">Pick a recipe. Compare the ingredients. Take the prompt and cook.</p>
       </div>
-      <div id="app" class="cookbook" aria-live="polite"></div>
+      <nav class="section-nav" aria-label="Cookbook sections">
+        <button data-jump="section-1">Recipe</button><button data-jump="section-2">Stack</button><button data-jump="section-3">Costs & compare</button><button data-jump="section-4">Builder</button><button data-jump="section-5">Hard parts</button><button data-jump="section-6">Prompts</button>
+      </nav>
+      <div id="app" class="cookbook"></div>
     </div>
   </main>
 
   <footer class="neo-footer" data-footer-mode="minimal">
-    Infra prices researched July 2026, AI model prices verified August 2026: they change often; always confirm on the linked pricing pages. All planning stays on this device.
+    Prices are reference scenarios; verify the linked provider pages. Plans stay in your browser unless you export or share them.
   </footer>
 
   <script type="module" src="js/app.js"></script>

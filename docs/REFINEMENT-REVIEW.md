@@ -1,0 +1,287 @@
+> Historical proposal. The user superseded the broader redesign with a return to the original table-and-brand cookbook. See PRODUCT.md, DESIGN.md and docs/IMPLEMENTATION.md for the current UI scope.
+
+# Doorman: product critique and refinement plan
+
+Reviewed 2026-09-20. Target: `index.html` and its application modules.
+
+Doorman has the beginnings of a useful decision tool, but currently turns a product idea into an infrastructure shopping list. Its most valuable next step is to make **the smallest useful product** the unit of planning. A build option should combine an outcome, scope, design, concrete stack, cost assumptions, access requirements and next iteration.
+
+This document records findings and proposed work. It does not represent an implemented redesign. The separate Échéance follow-up is in `../echeance-site/docs/tasks/doorman-access-guides.md`.
+
+## Evidence and limits
+
+- Read the application, state, pricing, recipe and export modules, plus the local Pathfinder and Échéance documentation and relevant source.
+- Ran independent human-style design and automated detector assessments.
+- Inspected Chromium screenshots and exercised the app at 1440×1000, 390×844 and 320×844.
+- Ran axe on the default desktop and 390px mobile states; tested keyboard focus, copying immediately after input changes, preset persistence and malformed share payloads separately.
+- Compared quick-swap predictions against actual applied totals for all 17 recipes and both OSS/managed strategies.
+- Spot-checked current official pricing/access documentation. This was not a re-verification of all 88 service options or all model prices.
+- The public Échéance URL could not be retrieved through the web tool. Integration findings come from the local `echeance-site` checkout; its deployed parity was not established.
+- No screen-reader session or user study was performed. Heuristic scores are expert judgments, not measurements of user success.
+- Browser checks were headless. No user-visible detector overlay was produced: there was no browser connector and the live detector endpoint lacked its asset.
+
+## Visual verdict
+
+The service-specific writing has personality and practical value. The presentation feels templated in several places: a metric panel nested inside a summary panel, repeated bordered cards, colored side stripes, and an oversized uppercase instruction paragraph. The problem is less the color scheme than the hierarchy. Too much interface explains the catalogue before helping someone choose a build.
+
+Keep the Neorgon identity and the useful tables. There is no reason to start with a framework migration, a new backend, or a wholesale visual rebrand. Do not edit the vendored header/footer/theme kits in this repo.
+
+The strongest existing elements are worth preserving:
+
+1. Free-tier limits, gotchas and exit costs acknowledge the consequences of a stack choice.
+2. Bundling makes it possible to explain several capabilities delivered by one service.
+3. Local persistence, share links, Markdown exports and pinned comparison are a useful foundation for reviewing a plan with an agent.
+
+## Five priority problems
+
+### 1. P1: The product cannot express how little to build
+
+`Hobby / Launched / Scaling` are spending scenarios, not implementation levels (`js/data-recipes.js:12`). Recipe categories remain fixed. The default is a SaaS dashboard with seven service categories at Launched. “Blank Canvas” also fills all 15 categories with defaults; it is not an empty plan (`js/state.js:45`).
+
+The introductory assertion that every site has a database, auth gate, bucket and CDN teaches the wrong starting assumption. Pathfinder's core canvas, persistence, exports and asynchronous review can operate as static browser software. Its local documentation explicitly describes serverless review patches as an intentional alternative to realtime collaboration.
+
+**Confirmed counterexample:** select Static SPA on GitHub Pages, then Free tier. The app replaces `database: none` with Convex and replaces GitHub Pages with Cloudflare Pages. The result still says “no backend, $0 at every tier,” while the model now totals $30/month at Launched and $150/month at Scaling. `freeTierPicks()` excludes `none` before selecting alternatives (`js/state.js:122`). A command presented as a saving adds an entire system.
+
+**Fix:** model required capabilities before choosing providers. Offer `Now / Later / Not needed`, with a reason and upgrade trigger for each capability. Global vendor changes must preserve deliberate omissions. “No hosted database” must allow local editable state, not just static/read-only JSON as the current description suggests.
+
+Separate these axes:
+
+| Axis | Example | Changes |
+|---|---|---|
+| Implementation stage | Local tool, shareable MVP, team product | Features and necessary capabilities |
+| Expected usage | Users, storage, requests, seats, transactions | Consumption and cost |
+| Design | Diagram workbench, inspector, compact density | Interaction and visual requirements |
+| Stack strategy | Fewest services, managed convenience, self-hosting | How capabilities are implemented |
+
+These should not become a giant matrix of controls. Initially offer two or three curated candidates and allow details to expand.
+
+### 2. P1: Cost presentation is more confident than the underlying model
+
+**Reproduced arithmetic mismatch:** the default SaaS OSS preview says $38/month at Launched. Applying All open-source produces $58/month. Across 17 recipe defaults, 10 OSS previews disagree with the applied result in at least one tier. Categories without an OSS replacement disappear from `strategyTotals()` but remain selected when `applyStrategy()` runs (`js/costmodel.js:47`, `js/state.js:99`). The managed cases matched in this check; that is not proof that every manually assembled configuration is correct.
+
+**“Year one, all-in” is materially mislabeled.** `yearOneTotal()` always uses 12 months at Launched plus one selected model estimate (`js/costmodel.js:100`). Selecting Hobby does not change it. It excludes human work, maintenance and variable payment fees. Stripe has a zero recurring cost row while its transaction charge is stored as prose (`js/services-identity.js:78`). A SaaS dashboard currently shows $1,344 for year one even after switching its displayed tier to Hobby.
+
+Other model weaknesses:
+
+- Launched does not specify a workload. “Scaling = approximately 10× Launched” does not define requests, reads, fan-out, seats or egress.
+- Usage fields only affect the exported research prompt; they do not affect the on-page bill. Their location makes this distinction easy to miss.
+- A custom domain is optional, and an existing domain can have no incremental acquisition cost. It is not a universal minimum bill.
+- Self-hosted services carry individual VPS-style amounts, without representing whether they share one machine. Cost belongs to a billable resource or subscription, not automatically to every software component.
+- Frontend token factors and the 3:1 input/output blend are assumptions. A framework is not intrinsically 1.5× the build cost, and a static canvas can have difficult interaction work despite cheap hosting.
+- “Best value” implies an evaluation that is not documented. Subscription coverage and savings claims are also stronger than the evidence presented.
+- `MODEL_PRICING_SOURCES` exists but is not used by the rendered model table. A shared verification date is not row-level provenance.
+
+There is confirmed stale content: the Netlify option records 100 GB, 300 build minutes and $19/member Pro. Its current official pricing page shows credit-based plans, including a $9 Personal plan and $20 Pro with unlimited members. A generic dated footer cannot repair this mismatch. [Netlify pricing](https://www.netlify.com/pricing/)
+
+**Fix:** use one configuration resolver for preview, apply, comparison and export. Label the immediate output “Estimated recurring infrastructure,” expose the workload and exclusions, and use ranges for uncalibrated build effort. Distinguish marginal cost with an existing subscription from purchasing a new one. Store sources, verification date and confidence per price record. Missing/invalid data should read “Unknown,” not “Free.”
+
+Apply eligibility checks before describing a host as a free production option. For example, GitHub Pages explicitly limits using it to operate an online business, ecommerce site or commercial SaaS; availability of static hosting alone does not establish suitability. [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)
+
+### 3. P1: Export loses the user's intent
+
+Selecting Notion produces a generic SaaS dashboard prompt that never mentions Notion. Preset identity lives in `state.ui`, which is not persisted or shared (`js/state.js:201`). The preset chip and its caveat disappear after reload. This is central information for the agent, not temporary presentation state.
+
+The prompt lists vendors and warnings, but omits the specific core workflow, screens, design reference, acceptance criteria, current project context, access setup and phase boundary. “Ship the smallest working version” is one sentence underneath a whole selected stack (`js/prompt.js:46`). The list of ingredients effectively wins over that sentence.
+
+“Framework (Next/SvelteKit/Vue)” is not a concrete stack decision. Nor is “Vanilla + Tailwind” a design specification. The current frontend selector also permits no-code choices without establishing whether the selected backend and required interactions support them.
+
+**Fix:** export a build contract with:
+
+1. Project objective and what is being borrowed from the reference product.
+2. Selected stage and measurable acceptance criteria.
+3. Included capabilities and explicit deferred work.
+4. Design references, layout, interaction behavior, responsive expectations and accessibility requirements.
+5. Exact stack choices and capability ownership, including bundled and local capabilities.
+6. Existing repository/context or explicit unknowns.
+7. Access prerequisites and relevant tutorial links, using variable names and metadata only.
+8. Cost assumptions, sources, confidence and exclusions.
+9. Ordered implementation steps and the condition for advancing to the next stage.
+
+Offer a concise **Copy current iteration** action first, plus full Markdown and versioned JSON exports. Later add **Copy next iteration**, which describes only the delta from the accepted baseline. Imported JSON, saved sessions, share links and prompt generation should all pass through the same normalization and validation rules.
+
+Replace “do not relitigate” with a useful constraint: preserve agreed decisions; if a verified incompatibility prevents them, report the evidence and smallest viable adjustment. Do not silently add services.
+
+### 4. P1: Navigation and update behavior obstruct the main task
+
+The default page is 4,628px tall on desktop and 7,957px at 390px mobile. The export section begins around y=6,459 on mobile, nearly eight screen heights down. There is no persistent task navigation or immediately available build-brief action.
+
+The current comparison answers “which vendors cost more?” It does not show whether two candidates deliver the same features, their frontend names, design, setup work, credentials or upgrade implications. Comparing different recipes can therefore reward a cheaper but less capable option without making that tradeoff explicit.
+
+The code also has behavior defects:
+
+| Finding | Evidence | Required correction |
+|---|---|---|
+| Accordion activation drops focus to `BODY` | Keyboard Enter reproduced; `js/render.js:446`, `js/events.js:26` replace all interactive children | Preserve controls or restore focus to the matching control after targeted updates |
+| First Copy fit check click after editing a usage field does nothing | Clipboard stub recorded zero writes after first click, one after second; input blur triggers full render | Update the preview without destroying the pending click target; preserve input focus/selection |
+| Whole application is an `aria-live` region | `index.html:92` | Announce a concise result in a dedicated status region; verify with a screen reader |
+| Primary copy button text contrast is 2.84:1 | Both copy buttons, axe and computed colors; `css/style.css:132` | Dark text on gold or a darker accessible fill; verify hover too |
+| Scrollable prompt previews cannot receive keyboard focus | Both `<pre>` elements flagged by axe, `js/render.js:424` and `:438` | Focusable, named preview regions or a suitable read-only text control |
+| Ingredient prices disappear below 720px | `css/style.css:711`, verified at 390px | Keep price under the provider name if space is tight |
+| 320px viewport overflows to 364px | Strategy switch extends outside the viewport; comparison cards also overflow slightly | Wrap/stack strategy actions; contain wide tables without losing content |
+| Malformed but decodable share payloads blank the app | Invalid frontend, invalid tier and `picks: null` each produce uncaught errors with zero rendered app children | Validate before mutating state, recover with an inline message and preserve previous valid configuration |
+
+At 390px the default and pinned comparison do fit. Do not describe all mobile layouts as broken. The 28px preset and 31px segmented controls are uncomfortable touch targets, but exceed the 24px minimum threshold; increasing toward 44px is an ergonomic improvement, not a demonstrated target-size violation.
+
+**Fix the navigation around four jobs:** Define scope, Compare options, Prepare access, Export. Keep the selected stage, recurring estimate and Copy current iteration visible. On mobile use a compact action bar with enough bottom padding so it never covers content. Show detailed prices, model research and prompt previews on demand.
+
+### 5. P1: Setup effort is absent from the comparison
+
+A free service can be expensive in account setup, verification, scope selection, callback configuration and troubleshooting. This is exactly the friction the user described. MCP availability is useful metadata, but it is not the whole access story. CLI sessions, scoped API access and manual setup can all be valid routes.
+
+Échéance already has 23 tutorials in `data/tutorials.yaml`, stable routes of the form `#tutorial/<id>`, and a generated `llms.txt`. It already covers GitHub CLI, Wrangler, Convex, Clerk and Airtable, among others. Link to the relevant tutorial beside the selected service, not only to a general directory at the bottom.
+
+Examples of existing routes:
+
+- `https://echeance.neorgon.com/#tutorial/gh-cli`
+- `https://echeance.neorgon.com/#tutorial/wrangler-oauth`
+- `https://echeance.neorgon.com/#tutorial/convex-cli`
+- `https://echeance.neorgon.com/#tutorial/clerk-instance`
+- `https://echeance.neorgon.com/#tutorial/airtable-pat`
+
+For each required external capability, show access method, manual step, intended account/project/environment, variable names, required permissions, safe verification and tutorial link. Distinguish **documented setup** from **access verified in the execution environment**: a static planning site cannot certify that an agent has working credentials.
+
+Tutorials should diagnose wrong account, wrong project, dev/prod mismatch, missing scope, expired authentication, environment delivery, quota and network errors before suggesting rotation. Default service access checks should avoid mutations and never print secrets. Put any write verification in a separately identified disposable test environment.
+
+Current official references demonstrate why ongoing verification matters: Cloudflare separates permission groups from the resources a token can reach; Supabase distinguishes public application keys from elevated server keys; Convex deployment targeting depends on the environment and deployment key. [Cloudflare token creation](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/), [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys), [Convex CLI](https://docs.convex.dev/cli/overview)
+
+## Proposed Pathfinder comparison
+
+The reference is a planning canvas that produces an actionable AI brief, not a commitment to reproduce every Lucidchart feature. This is a proposal for candidates; amounts beyond the local stage require a specified workload and verified hosting eligibility.
+
+| | Local working tool | Shareable static tool | Team product |
+|---|---|---|---|
+| Outcome | Create and connect a plan, export its brief | Exchange plans and review feedback | Save and collaborate across accounts/devices |
+| Included | Typed nodes, connectors, inspector, local save, JSON import/export, prompt export | Previous scope plus share links/files, read-only review, importable feedback | Previous scope plus identity, permissions, hosted persistence and backups |
+| Design | Canvas workbench; readable nodes; inspector; keyboard controls | Same interaction model with clear edit/view/review modes | Same workbench with ownership, members and save/sync status |
+| Concrete starting stack | HTML/CSS/JS modules, SVG, browser storage | Same app plus an eligible static host and repository deployment | Existing frontend plus a chosen backend/auth integration, only after the access model is defined |
+| External services | None for local use | Static hosting; custom domain optional | Hosted data and identity; bundled where suitable |
+| Deliberately deferred | Accounts, billing, cloud sync, live collaboration | Accounts and simultaneous editing | Billing and simultaneous editing unless explicitly required |
+| Recurring estimate | $0 external infrastructure locally | Potentially $0 within verified host limits | Workload/seat-dependent; show sources and range |
+| Limitation | Browser-local state; exports are needed for portability | Copies and feedback are asynchronous; public links are not access control | Setup, authorization and operational responsibilities increase |
+| Upgrade trigger | Someone else needs to use or review a plan | Private shared ownership or cross-device state becomes necessary | Simultaneous edits, paid access or reliability requirements are demonstrated |
+
+These are meaningful levels because each changes the user's capabilities. They should not merely switch the same feature set among three vendor lists. A mature local tool is also a valid destination; stages are not a compulsory ladder toward SaaS.
+
+## Candidate and comparison contract
+
+For a first release, keep two named candidates visible and permit a third. Rows should compare: included features, deferred features, design, concrete stack, recurring costs, one-time work, access setup, operational effort, portability, limitations and next upgrade. Highlight differences and allow restoring the baseline as well as repinning it.
+
+Use plain ordinal setup labels with reasons, such as “one CLI login” or “three accounts plus email DNS.” Do not invent a numerical complexity score or precise setup duration without measurements.
+
+A possible versioned data shape:
+
+```json
+{
+  "schemaVersion": 2,
+  "id": "pathfinder-local",
+  "name": "Local planning canvas",
+  "reference": { "product": "Pathfinder", "workflow": "Map a plan and export an AI brief" },
+  "stage": "local",
+  "design": {
+    "pattern": "canvas-with-inspector",
+    "density": "compact",
+    "requirements": ["keyboard editing", "visible focus", "readable node labels"]
+  },
+  "capabilities": {
+    "editing": "now",
+    "localPersistence": "now",
+    "jsonExport": "now",
+    "accounts": "later",
+    "payments": "not-needed"
+  },
+  "stack": { "frontend": "html-css-js", "diagram": "svg", "persistence": "browser-storage" },
+  "accessRequirements": [],
+  "usageAssumptions": { "users": 1 },
+  "cost": { "status": "scenario", "recurringInfrastructureUsd": 0, "exclusions": ["human work", "AI usage"] },
+  "acceptanceCriteria": ["Export and re-import preserve node content and connections"],
+  "nextStageTrigger": "Another person needs to review the plan"
+}
+```
+
+This is a proposed contract, not a schema already accepted by the current app. Price records should separately carry provider/plan, billing unit, currency, source URL, verification date and confidence. Access requirements contain names and references, never credential values. Bundled ownership should identify the provider explicitly instead of relying only on a bare `bundled` sentinel.
+
+## Example current-iteration export
+
+```text
+Build iteration 1 of a Pathfinder-inspired planning canvas.
+
+Objective: a single user can map a project and export a useful AI implementation brief.
+Scope: typed nodes, labeled connectors, a node inspector, local persistence,
+JSON import/export and Markdown prompt export.
+Design: canvas workbench with compact controls, readable node text, a collapsible
+inspector, visible keyboard focus and a usable narrow-screen editing mode.
+Stack: HTML/CSS/JS modules and SVG. Use browser storage for the working document.
+External access required for this iteration: none.
+
+Deferred: accounts, hosted database, payments, email, cloud sync and realtime editing.
+Acceptance: create three linked nodes; edit them; reload without losing them;
+export and re-import without losing content or links; operate the core editing flow
+with a keyboard; exported Markdown describes the nodes and their relationships.
+
+Inspect the existing repository first and preserve working behavior.
+Implement this scope, then report checks, limitations and the next-stage trigger.
+Do not provision external services for deferred features.
+Next stage: sharing and asynchronous review when a second person needs the plan.
+```
+
+## Implementation sequence
+
+| Milestone | Deliverable | Acceptance |
+|---|---|---|
+| 1. Restore trust | Shared strategy resolver; preserve skipped capabilities; preset identity in persistence/export; share validation; copy/focus fixes; contrast and narrow-screen fixes | All 17 recipe strategy previews match applied totals; Free tier does not add a database to the static recipe; preset survives share/reload/export; malformed shares recover; first copy after input works; keyboard focus survives |
+| 2. One complete staged recipe | Pathfinder/diagram-workbench archetype with local, shareable and team candidates; explicit design and deferrals | A user can compare the three outcomes and export only the chosen iteration; no account is required by the local candidate |
+| 3. Make comparison central | Two or three named candidates, persistent summary/action, concise comparison Markdown, versioned JSON | Name, scope, design, stack, assumptions and acceptance criteria survive an export/import round trip; narrow layouts retain prices |
+| 4. Connect access guidance | Contextual Échéance links and an access checklist for active capabilities | Local scope produces an empty checklist; hosted scope lists only its required access; no secret values in prompts, storage or URLs |
+| 5. Improve evidence and coverage | Reverify the default/selected services first; row-level sources; workload scenarios; calibrated ranges; expand staged recipes | Every default recommendation has a source/date or explicit unverified status; UI and exports show the same assumptions and exclusions |
+
+The first product-design decision should be whether the Pathfinder example can be understood and exported in roughly a minute. Validate that task before expanding every archetype or adding more vendors.
+
+Maintain the current zero-build architecture. Split rendering/normalization/resolution into small modules as needed; do not violate the repository's approximate 500-line module convention. Preserve intentional unbundled recipe defaults while making capability ownership explicit. A capability resolver must not indiscriminately overwrite valid overrides.
+
+Useful follow-up skill sequence: `impeccable harden` for milestone 1, `impeccable shape` for staged comparison, `impeccable clarify` for scope/cost language, `impeccable adapt` for the new mobile flow, then `impeccable polish`. The current review establishes proposed direction; strategic PRODUCT.md and visual DESIGN.md can be captured with the next design pass.
+
+## Heuristic assessment
+
+| Heuristic | Score /4 | Main finding |
+|---|---:|---|
+| Visibility of system status | 2 | Totals and toasts help; bulk changes and selected states are incomplete |
+| Match with the real world | 2 | Product references help; infrastructure-first choices obscure the outcome |
+| User control and freedom | 2 | Reversible picks exist; no undo for bulk replacement |
+| Consistency and standards | 2 | Coherent styling; inconsistent control semantics and broken keyboard continuity |
+| Error prevention | 1 | Unvalidated configurations and scope-changing swaps |
+| Recognition rather than recall | 2 | Visible services; comparison requires remembering distant sections |
+| Flexibility and efficiency | 2 | Good exports/presets; no named collection or implementation levels |
+| Aesthetic and minimalist design | 2 | Consistent layout; excessive reading before the main action |
+| Error recognition and recovery | 2 | Copy fallback exists; share/input recovery needs work |
+| Help and documentation | 3 | Useful service caveats; missing setup/access path |
+| **Total** | **20/40** | **Useful foundation; substantial workflow changes needed** |
+
+This is the independent design assessment. The separately reproduced functional failures add concrete repair work and are not disguised as precision in the score. First run for this target; there is no score trend yet.
+
+Cognitive-load review: 6 of 8 items fail (single focus, chunking, hierarchy, one decision at a time, limited choices, working-memory support). Grouping and disclosure of service alternatives work. There are 17 recipes, eight visible familiar-site chips, seven default service rows, four frontend choices and 12 model rows. Large reference tables can be useful; forcing them into the primary decision sequence is the problem.
+
+Persona red flags:
+
+- First-time builder: cannot start from “the useful part of Pathfinder”; must classify the app and interpret infrastructure before describing its outcome.
+- Experienced builder: cannot compare named scope/design candidates or get a concise iteration brief without scrolling and editing the export manually.
+- Keyboard/screen-reader user: focus is destroyed, selected tier/preset states are not exposed, repeated “Use this” actions lack context, and oversized live updates need testing.
+
+## Detector results and smaller improvements
+
+Static scan: two warnings and two advisories. The 195-character uppercase intro is real. The black-on-dark contrast result is a false positive from unresolved styling; actual body text is light. Decorative stripes belong to an inactive danger theme. The image transform is a minor shared brand-mark hover, not a reason to edit vendored code.
+
+Rendered detector: 61 occurrences, not 61 separate defects. Many are repeated 10px labels or line-length checks. Its bounce result refers to an unused CSS token. Header subtitle contrast on the gradient remains unconfirmed and needs manual verification.
+
+Axe: two violation rules affecting four nodes at each tested default viewport, covering the two copy buttons and two prompt previews. A clean result on other rules is not a complete accessibility certification.
+
+Additional P2 work:
+
+- Add a visible comparison-input label, expose selected tiers/presets with appropriate semantics, and label repeated actions with the provider name.
+- Replace “All open-source” with wording that acknowledges unavoidable managed services, unless the resolver actually guarantees a complete OSS configuration.
+- Reduce “pay-to-win,” “Boss fight,” “go cook” and absolute claims in decision-critical text. “Recreate the core workflow” better describes the achievable outcome.
+- Keep build size and ingredient count secondary. Five metrics in a four-column grid create a weak hierarchy and a stranded fifth metric.
+- Add Undo after changing a recipe or an entire strategy. `history.replaceState` does not supply this behavior.
+- Surface subscription sources near model/tool claims. Keep the model catalogue in an optional estimation panel.
+- Preserve cheap architecture without claiming free maintenance: vanilla modules can reuse components, while framework choice need not dictate server hosting.
+
+Open validation questions for the design pass: can users identify the cheapest sufficient outcome without vendor knowledge; can they explain what is deferred; and can an agent implement the export without inventing the missing product?

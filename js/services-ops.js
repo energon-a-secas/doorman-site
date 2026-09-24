@@ -10,10 +10,10 @@ export const email = {
   options: {
     resend: {
       name: 'Resend', type: 'freemium', strategy: 'managed', recommended: true, freeTier: true,
-      free: '100 emails/day (~3k/mo)',
+      free: '3,000 emails/month; 100/day; 3 domains',
       entry: '$20/mo Pro (50k)', url: 'https://resend.com/pricing',
-      gotcha: 'Developer-first DX; the daily free cap means a signup spike queues your password resets.',
-      cost: { hobby: 0, launched: 20, scaling: 50 },
+      gotcha: 'Daily and monthly limits both matter. Handle quota failures; the provider does not promise to queue your password resets.',
+      cost: { hobby: 0, launched: 20, scaling: 90 },
       exit: 'easy', exitNote: 'Swap the API and re-verify DNS: an afternoon.',
       rule: 'Set up SPF, DKIM and DMARC before the first signup: a spam-foldered reset email is a lost user.',
     },
@@ -104,6 +104,11 @@ export const analytics = {
   icon: 'chart',
   blurb: 'Pageviews and product events. Decide early: privacy-first or full-funnel.',
   options: {
+    none: {
+      name: 'No analytics service', type: 'none', strategy: null,
+      free: '', entry: '$0', url: '', gotcha: 'Review usage manually until a specific measurement will change a product decision.',
+      cost: { hobby: 0, launched: 0, scaling: 0 },
+    },
     posthog: {
       name: 'PostHog', type: 'freemium', strategy: 'managed', recommended: true,
       free: '1M events/mo + 5k replays + feature flags',

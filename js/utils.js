@@ -32,9 +32,10 @@ export function fmtTokens(n) {
   return String(n);
 }
 
-/** Format a USD monthly cost: 0 → "Free", small → cents, large → rounded. */
+/** Format a USD monthly cost: 0 → "$0", small → cents, large → rounded. */
 export function fmtUsd(n) {
-  if (!Number.isFinite(n) || n <= 0) return 'Free';
+  if (!Number.isFinite(n) || n < 0) return 'Unknown';
+  if (n === 0) return '$0';
   if (n < 1) return '$' + n.toFixed(2);
   if (n < 100) return '$' + (Number.isInteger(n) ? n : n.toFixed(2));
   return '$' + Math.round(n).toLocaleString('en-US');
@@ -55,8 +56,10 @@ export async function copyToClipboard(text) {
       return true;
     }
   } catch { /* fall through to legacy path */ }
+  const active = document.activeElement;
+  let ta;
   try {
-    const ta = document.createElement('textarea');
+    ta = document.createElement('textarea');
     ta.value = text;
     ta.setAttribute('readonly', '');
     ta.style.position = 'absolute';
@@ -68,6 +71,9 @@ export async function copyToClipboard(text) {
     return ok;
   } catch {
     return false;
+  } finally {
+    ta?.remove();
+    active?.focus({ preventScroll: true });
   }
 }
 
