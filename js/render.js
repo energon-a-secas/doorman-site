@@ -41,7 +41,6 @@ function renderRecipes() {
       <div class="step-head">
         <span class="step-head__n">1</span>
         <h2 class="step-head__title" id="s1">Pick a recipe</h2>
-        <p class="step-head__lead">Choose a starting combination, then compare prices and swap any ingredient.</p>
       </div>
       <div class="recipe-bar">
         <span class="recipe-bar__icon">${icon(r.icon)}</span>
@@ -144,7 +143,7 @@ function renderIngredient(catKey) {
           ${pickHtml}
         </span>
         ${costHtml}
-        <span class="ing__chev" aria-hidden="true">▸</span>
+        <span class="ing__chev" aria-hidden="true">${icon('chevron')}</span>
       </button>
       ${open ? altsHtml : `<div id="options-${catKey}" hidden></div>`}
     </div>`;
@@ -184,7 +183,7 @@ function renderStack() {
             <button class="switch__btn switch__btn--paid" data-action="strategy" data-strategy="managed">Prefer managed</button>
           </span>
         </span>
-        <p class="step-head__lead">Tap an ingredient to swap it. BaaS picks (Convex, Supabase, Firebase, PocketBase) absorb whole categories into one bill.</p>
+        <p class="step-head__lead">BaaS picks (Convex, Supabase, Firebase, PocketBase) absorb whole categories into one bill.</p>
       </div>
       <div class="stack-list">
         ${activeCategories().map(renderIngredient).join('')}
@@ -337,8 +336,7 @@ function renderBuilder() {
       <span class="tool-item__note">${escHtml(tool.note)}</span>
     </li>`).join('');
   return `<section class="step" id="section-4" aria-labelledby="s4">
-      <div class="step-head"><span class="step-head__n">4</span><h2 class="step-head__title" id="s4">The builder</h2>
-      <p class="step-head__lead">Compare model prices and the tools that run the build.</p></div>
+      <div class="step-head"><span class="step-head__n">4</span><h2 class="step-head__title" id="s4">The builder</h2></div>
       <div class="cost-grid"><div class="cost-card">
         <h3 class="cost-card__title">Build it: AI cost scenarios</h3>
         <p class="cost-card__sub">${fmtTokens(tokens)} illustrative tokens for this recipe and frontend, at a 3:1 input/output ratio. This is an assumption, not a measured build estimate.</p>
@@ -361,7 +359,6 @@ function renderChallenges() {
       <div class="step-head">
         <span class="step-head__n">5</span>
         <h2 class="step-head__title" id="s5">The hard parts</h2>
-        <p class="step-head__lead">What this recipe hides from you, plus the fine print on every ingredient you picked.</p>
       </div>
       <div class="chal-grid">
         <div>
@@ -401,7 +398,6 @@ function renderExport() {
       <div class="step-head">
         <span class="step-head__n">6</span>
         <h2 class="step-head__title" id="s6">Take the prompts</h2>
-        <p class="step-head__lead">Two exports: the build order for the AI that cooks, and a fit check that asks whether the free tiers will actually hold your numbers.</p>
       </div>
       <p class="setup-link">Need credentials or CLI setup? <a href="https://echeance.neorgon.com/#tutorials" target="_blank" rel="noopener noreferrer">Échéance setup tutorials ↗</a></p>
       <div class="export-grid">

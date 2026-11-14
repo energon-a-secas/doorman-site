@@ -198,39 +198,6 @@ button:active, .btn:active {
   }
 }
 
-/* ── Intro ─────────────────────────────────────────────────── */
-.intro {
-  max-width: 640px;
-  margin: 0 auto var(--space-8);
-  padding: var(--space-8) 0 var(--space-6);
-  position: relative;
-}
-.intro__hook {
-  font-size: clamp(1.45rem, 2.8vw, 1.9rem);
-  font-weight: 700;
-  line-height: 1.18;
-  letter-spacing: -0.015em;
-  color: oklch(95% 0.006 72);
-  margin: 0 0 var(--space-4);
-}
-.intro__body {
-  font-size: var(--text-base);
-  line-height: 1.7;
-  color: oklch(66% 0.006 255);
-  margin: 0 0 20px;
-  max-width: 54ch;
-}
-.intro__cta {
-  font-size: var(--text-sm);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--accent-bright);
-  margin: 0;
-  padding-top: var(--space-3);
-  border-top: 1px solid oklch(55% 0.09 58 / 0.3);
-}
-
 /* ── Cookbook steps ────────────────────────────────────────── */
 .cookbook { display: flex; flex-direction: column; gap: var(--space-8); animation: fadeIn 0.35s ease-out both; }
 
@@ -421,11 +388,14 @@ button:active, .btn:active {
 }
 .ing__cost { font-size: var(--text-sm); color: var(--text-secondary); text-align: right; white-space: nowrap; }
 .ing__cost small { display: block; font-size: 10px; color: var(--text-muted); }
+/* The chevron is the swap affordance: no lead tells you the rows open. */
 .ing__chev {
-  color: var(--text-muted);
-  font-size: var(--text-xs);
-  transition: transform var(--dur-fast);
+  display: inline-flex;
+  color: var(--text-secondary);
+  transition: transform var(--dur-fast), color var(--dur-fast);
 }
+.ing__chev .ic { width: 18px; height: 18px; }
+.ing__main:hover .ing__chev, .ing.is-open .ing__chev { color: var(--accent-bright); }
 .ing.is-open .ing__chev { transform: rotate(90deg); }
 
 /* Swap panel: two columns — open source vs managed */
@@ -726,10 +696,6 @@ button:active, .btn:active {
 /* Focused polish over the original cookbook layout. */
 html { scroll-padding-top: 88px; }
 .container--wide { max-width: 1180px; }
-.intro { max-width: none; padding-top: 12px; margin-bottom: 20px; }
-.intro__hook { font-size: 1.75rem; }
-.intro__body { max-width: 68ch; margin-bottom: 12px; color: var(--text-secondary); }
-.intro__cta { text-transform: none; letter-spacing: 0; padding-top: 10px; }
 .section-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 8px 0; margin-bottom: 28px; border-bottom: 1px solid var(--border-strong); }
 .section-nav button { font: inherit; font-size: var(--text-sm); color: var(--text-secondary); background: transparent; border: 0; border-radius: 6px; min-height: 44px; padding: 8px 14px; cursor: pointer; transition: color 160ms ease-out, background-color 160ms ease-out; }
 .section-nav button:hover { background: var(--surface-2); color: var(--text-primary); }
